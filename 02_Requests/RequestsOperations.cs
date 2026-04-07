@@ -21,9 +21,8 @@ public class RequestOperations
 
     public async Task<RestResponse> UniversalPutRequestForEndpointOperations(string operationCode)
     {
-        await requestsClients.RequestForEndpointCreateClients();
-        await requestsClients.PostAuthentificationToken();
-      
+       
+        
         var createRequest = request.GenRequest("api/operations", Method.Put);
          if (requestsClients.serializationDataClients?.AccessToken != null)
         {

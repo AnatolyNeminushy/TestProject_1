@@ -12,6 +12,8 @@ public class OrderingACardTests
     private RequestsClients requestsClients = new RequestsClients();
     private RequestOperations requestOperations = new RequestOperations();
     private OperationInfo operationInfo = new OperationInfo();
+
+   
    
     [Theory]
     [InlineData("CardOrder","Дебетовая карта","Mastercard","lastname639111196098143429","name639111196098143429","middlenamfffffe639111196098143429","1971-12-18")]
@@ -56,6 +58,9 @@ public class OrderingACardTests
         
         
         // Asserts
+        await requestsClients.RequestForEndpointCreateClients();
+        await requestsClients.PostAuthentificationToken();
+      
         // PUT
         var putRequest = await requestOperations.UniversalPutRequestForEndpointOperations(operationCode);
         Console.WriteLine($"PutOrderingACardContent: {putRequest.Content}");
