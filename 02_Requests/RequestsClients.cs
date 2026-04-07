@@ -4,7 +4,7 @@ using RestSharp;
 
 namespace Clients;
 
-using System.Net;
+
 using System.Text.Json;
 using BaseSpaceRequest;
 
@@ -69,7 +69,6 @@ public class RequestsClients
 public async Task<RestResponse> RequestForEndpointNegativeCreateClients()
     {
         
-
         var createNegativeRequest = request.GenRequest("api/clients", Method.Put);
         var serializationNegativeDataClients = new DataClients();
         if(serializationDataClients != null)
