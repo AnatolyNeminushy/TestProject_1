@@ -13,7 +13,7 @@ public class CreateClientTestsPositive
     [Fact]
     public async Task CreateNewClientTest()
     {
-        // Act
+        // Arrange
         var options = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
         var (responseCreateClient, dataClients) =
             await requestClients.CreateRequestForEndpointClients();
@@ -33,7 +33,7 @@ public class CreateClientTestsPositive
         Assert.NotNull(dataAuthTokenDeserialize);
         var accessToken = dataAuthTokenDeserialize.AccessToken;
 
-        // Arrange
+        // Act
         Assert.NotNull(accessToken);
         var responseGetClient = await requestClients.GetRequestForEndpointClients(
             "api/clients",
