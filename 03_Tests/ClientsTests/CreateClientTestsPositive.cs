@@ -35,7 +35,10 @@ public class CreateClientTestsPositive
 
         // Arrange
         Assert.NotNull(accessToken);
-        var responseGetClient = await requestClients.GetRequestForEndpointClients(accessToken);
+        var responseGetClient = await requestClients.GetRequestForEndpointClients(
+            "api/clients",
+            accessToken
+        );
         Assert.NotNull(responseGetClient.Content);
         var getDataAfterCreateClientDeserialize = JsonSerializer.Deserialize<DataClients>(
             responseGetClient.Content,
