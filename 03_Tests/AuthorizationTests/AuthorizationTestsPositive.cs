@@ -14,7 +14,7 @@ public class AuthorizationTestsPositive
     [Fact]
     public async Task CreateNewClientTest()
     {
-        // Act
+        // Arrange
         // Тестовые данные пользователя
         //
         // {
@@ -45,7 +45,7 @@ public class AuthorizationTestsPositive
         Assert.NotNull(dataAuthTokenDeserialize);
         var accessToken = dataAuthTokenDeserialize.AccessToken;
 
-        // Arrange
+        // Act
         Assert.NotNull(accessToken);
         var responseGetAccounts = await requestsClients.GetRequestForEndpointClients(
             "api/accounts",

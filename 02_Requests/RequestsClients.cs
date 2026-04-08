@@ -43,6 +43,16 @@ public class RequestsClients
         return (response, data);
     }
 
+    // Добавил метод с перегрузкой,чтобы отправлять заранее заготовленные данные
+    public async Task<(RestResponse, DataClients)> CreateRequestForEndpointClients(DataClients data)
+    {
+        var createRequest = request.GenRequest("api/clients", Method.Put);
+
+        createRequest.AddJsonBody(data);
+        var response = await client.ExecuteAsync(createRequest);
+        return (response, data);
+    }
+
     // Получение данных о пользователе GET endpoint + BearerToken
     public async Task<RestResponse> GetRequestForEndpointClients(
         string endpoint,

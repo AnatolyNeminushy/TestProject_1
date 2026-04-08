@@ -13,7 +13,7 @@ public class CreateClientTestsNegative
     public async Task CreateNewClientTest()
     {
         var options = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
-        // Act
+        // Arrange
         var registeredDataClient = new DataClients
         {
             PhoneNumber = "+79788902369",
@@ -27,18 +27,16 @@ public class CreateClientTestsNegative
             Birthdate = "1998-12-06",
             Password = "Dima5678",
         };
-        // Asserts
-        //
-        // Негативный сценарий
-        // Create
+
+        // Act
         var (responseNegativeCreateClient, dataClients) =
             await requestsClients.CreateRequestForEndpointClients(registeredDataClient);
-        // var responseNegativeCreateClient = await requestsClients.CreateRequestForEndpointClients(
-        //     registeredDataClient
-        // );
+
+        // Asserts
         Console.WriteLine(
             $"[NEGATIVE_CREATE] StatusCode:{responseNegativeCreateClient.StatusCode}"
         );
+        Console.WriteLine($"[NEGATIVE_CREATE] Content:{responseNegativeCreateClient.Content}");
 
         Assert.Equal(HttpStatusCode.BadRequest, responseNegativeCreateClient.StatusCode);
     }
