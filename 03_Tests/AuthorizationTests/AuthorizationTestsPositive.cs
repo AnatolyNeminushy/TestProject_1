@@ -2,63 +2,78 @@ using System.Net;
 using System.Text.Json;
 
 namespace Authorization;
-using Clients;
+
 using BaseSpaceRequest;
+using Clients;
 
 public class AuthorizationTestsPositive
 {
-    
-    private RequestsClients ClientRequest ;
-    private RequestsAuthorization RequestsAuthorization;
-   
-   public AuthorizationTestsPositive()
-    {
-        ClientRequest = new RequestsClients();
-        RequestsAuthorization = new RequestsAuthorization(ClientRequest);
-    }
+    private RequestsClients requestsClients = new RequestsClients();
+    private AuthenticationToken postRequestToken = new AuthenticationToken();
 
     [Fact]
     public async Task CreateNewClientTest()
     {
-        var options = new JsonSerializerOptions
-        {
-            PropertyNameCaseInsensitive = true,
-        };
-        
+        // Act
+        // Тестовые данные пользователя
+        //
+        // {
+        //  "phoneNumber": "+79788902369",
+        //  "email": "dmitrytkachenko@yandex.ru",
+        //  "login": "DimaFire",
+        //  "address": "ул. Ленина, 45",
+        //  "birthdate": "1998-12-06",
+        //  "firstName": "Дмитрий",
+        //  "lastName": "Ткаченко",
+        //  "middleName": "Андреевич",
+        //  "password": "Dima5678",
+        //  "sex": "Male"
+        // }
+
+        var options = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
+        var login = "DimaFire";
+        var password = "Dima5678";
+        Assert.NotNull(login);
+        Assert.NotNull(password);
+
+        var autToken = await postRequestToken.RequestToObtainAuthenticationToken(login, password);
+        Assert.NotNull(autToken.Content);
+        var dataAuthTokenDeserialize = JsonSerializer.Deserialize<DataClients>(
+            autToken.Content,
+            options
+        );
+        Assert.NotNull(dataAuthTokenDeserialize);
+        var accessToken = dataAuthTokenDeserialize.AccessToken;
+
+        // Arrange
+        Assert.NotNull(accessToken);
+        var responseGetAccounts = await requestsClients.GetRequestForEndpointClients(
+            "api/accounts",
+            accessToken
+        );
+        var responseGetCards = await requestsClients.GetRequestForEndpointClients(
+            "api/cards",
+            accessToken
+        );
+        var responseGetCardsOrders = await requestsClients.GetRequestForEndpointClients(
+            "api/cards/orders",
+            accessToken
+        );
 
         // Asserts
-        // 
-        // Позитивный сценарий
-        // 
-        // Accounts
-        var responseAccounts = await RequestsAuthorization.UniversalGetRequestAfterAuthorization("api/accounts"); 
-        Console.WriteLine($"Accounts-StatusCode:{responseAccounts.StatusCode}");
-        Console.WriteLine($"Accounts-Content:{responseAccounts.Content}");
-        // Console.WriteLine($"Accounts-AccessToken:{ClientRequest.serializationDataClients?.AccessToken}");
-        Assert.Equal(HttpStatusCode.OK, responseAccounts.StatusCode);
-       
+        Console.WriteLine($"[GET_CLIENT_ACCOUNTS] Status Code:{responseGetAccounts.StatusCode}");
+        Console.WriteLine($"[CONTENT_GET_ACCOUNTS] Status Code:{responseGetAccounts.Content}");
+        Console.WriteLine($"[GET_CLIENT_CARDS] Status Code:{responseGetCards.StatusCode}");
+        Console.WriteLine($"[CONTENT_GET_CARDS] Status Code:{responseGetCards.Content}");
+        Console.WriteLine(
+            $"[GET_CLIENT_CARDS_ORDERS] Status Code:{responseGetCardsOrders.StatusCode}"
+        );
+        Console.WriteLine(
+            $"[CONTENT_GET_CARDS_ORDERS] Status Code:{responseGetCardsOrders.Content}"
+        );
 
-        // Cards
-        var responseCards = await RequestsAuthorization.UniversalGetRequestAfterAuthorization("api/cards"); 
-        Console.WriteLine($"Cards-StatusCode:{responseCards.StatusCode}");
-        Console.WriteLine($"Cards-Content:{responseCards.Content}");
-        // Console.WriteLine($"Cards-AccessToken:{ClientRequest.serializationDataClients?.AccessToken}");
-        Assert.Equal(HttpStatusCode.OK, responseCards.StatusCode);
-
-        // CardsOrders
-        var responseCardsOrders = await RequestsAuthorization.UniversalGetRequestAfterAuthorization("api/cards/orders"); 
-        Console.WriteLine($"CardsOrders-StatusCode:{responseCardsOrders.StatusCode}");
-        Console.WriteLine($"CardsOrders-Content:{responseCardsOrders.Content}");
-        // Console.WriteLine($"CardsOrders-AccessToken:{ClientRequest.serializationDataClients?.AccessToken}");
-        Assert.Equal(HttpStatusCode.OK, responseCardsOrders.StatusCode);
-
-
-       
-        
-
-        
-        
-
-
+        Assert.Equal(HttpStatusCode.OK, responseGetAccounts.StatusCode);
+        Assert.Equal(HttpStatusCode.OK, responseGetCards.StatusCode);
+        Assert.Equal(HttpStatusCode.OK, responseGetCardsOrders.StatusCode);
     }
 }
