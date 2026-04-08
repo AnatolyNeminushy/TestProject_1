@@ -43,10 +43,13 @@ public class RequestsClients
         return (response, data);
     }
 
-    // Получение данных о пользователе GET api/clients + BearerToken
-    public async Task<RestResponse> GetRequestForEndpointClients(string accessToken)
+    // Получение данных о пользователе GET endpoint + BearerToken
+    public async Task<RestResponse> GetRequestForEndpointClients(
+        string endpoint,
+        string accessToken
+    )
     {
-        var getRequest = request.GenRequest($"api/clients", Method.Get);
+        var getRequest = request.GenRequest(endpoint, Method.Get);
         getRequest.AddHeader("Authorization", $"Bearer {accessToken}");
 
         return await client.ExecuteAsync(getRequest);
