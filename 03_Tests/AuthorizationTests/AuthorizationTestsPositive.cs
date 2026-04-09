@@ -12,7 +12,7 @@ public class AuthorizationTestsPositive
     private AuthenticationToken postRequestToken = new AuthenticationToken();
 
     [Fact]
-    public async Task CreateNewClientTest()
+    public async Task AuthorizationClientTest()
     {
         // Arrange
         // Тестовые данные пользователя
@@ -62,15 +62,13 @@ public class AuthorizationTestsPositive
 
         // Asserts
         Console.WriteLine($"[GET_CLIENT_ACCOUNTS] Status Code:{responseGetAccounts.StatusCode}");
-        Console.WriteLine($"[CONTENT_GET_ACCOUNTS] Status Code:{responseGetAccounts.Content}");
+        // Console.WriteLine($"[CONTENT_GET_ACCOUNTS] Content:{responseGetAccounts.Content}");
         Console.WriteLine($"[GET_CLIENT_CARDS] Status Code:{responseGetCards.StatusCode}");
-        Console.WriteLine($"[CONTENT_GET_CARDS] Status Code:{responseGetCards.Content}");
+        // Console.WriteLine($"[CONTENT_GET_CARDS] Content:{responseGetCards.Content}");
         Console.WriteLine(
             $"[GET_CLIENT_CARDS_ORDERS] Status Code:{responseGetCardsOrders.StatusCode}"
         );
-        Console.WriteLine(
-            $"[CONTENT_GET_CARDS_ORDERS] Status Code:{responseGetCardsOrders.Content}"
-        );
+        // Console.WriteLine($"[CONTENT_GET_CARDS_ORDERS] Content:{responseGetCardsOrders.Content}");
 
         Assert.Equal(HttpStatusCode.OK, responseGetAccounts.StatusCode);
         Assert.Equal(HttpStatusCode.OK, responseGetCards.StatusCode);

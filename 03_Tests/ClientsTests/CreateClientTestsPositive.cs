@@ -39,6 +39,7 @@ public class CreateClientTestsPositive
             "api/clients",
             accessToken
         );
+
         Assert.NotNull(responseGetClient.Content);
         var getDataAfterCreateClientDeserialize = JsonSerializer.Deserialize<DataClients>(
             responseGetClient.Content,
@@ -53,7 +54,7 @@ public class CreateClientTestsPositive
         Console.WriteLine($"[CREATE] Status Code:{responseCreateClient.StatusCode}");
         Console.WriteLine($"[AUTH_TOKEN] Status Code:{autToken.StatusCode}");
         Console.WriteLine($"[GET_CLIENT] Status Code:{responseGetClient.StatusCode}");
-        Console.WriteLine($"[CONTENT_GET_CLIENT] Status Code:{responseGetClient.Content}");
+        Console.WriteLine($"[CONTENT_GET_CLIENT] Content:{responseGetClient.Content}");
 
         Assert.Equal(HttpStatusCode.OK, responseCreateClient.StatusCode);
         Assert.Equal(HttpStatusCode.OK, autToken.StatusCode);

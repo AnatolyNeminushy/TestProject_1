@@ -2,66 +2,56 @@ using System.Net;
 using System.Text.Json;
 
 namespace Authorization;
+
 using Clients;
-using BaseSpaceRequest;
 
 public class AuthorizationTestsNegative
 {
-    
-    private RequestsClients ClientRequest ;
-    private RequestsAuthorization RequestsAuthorization;
-   
-   public AuthorizationTestsNegative()
-    {
-        ClientRequest = new RequestsClients();
-        RequestsAuthorization = new RequestsAuthorization(ClientRequest);
-    }
+    private RequestsClients requestsClients = new RequestsClients();
 
     [Fact]
-    public async Task CreateNewClientTest()
+    public async Task AuthorizationClientTest()
     {
-        var options = new JsonSerializerOptions
-        {
-            PropertyNameCaseInsensitive = true,
-        };
-
+        // Arrange
+        var options = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
         var accessToken = "repfppdprgrp";
 
+        // Act
+        var responseNegativeGetAccounts = await requestsClients.GetRequestForEndpointClients(
+            "api/accounts",
+            accessToken
+        );
+
+        var responseNegativeGetCards = await requestsClients.GetRequestForEndpointClients(
+            "api/cards",
+            accessToken
+        );
+
+        var responseNegativeGetCardsOrders = await requestsClients.GetRequestForEndpointClients(
+            "api/cards/orders",
+            accessToken
+        );
+
         // Asserts
-        // 
-        // Негативный сценарий
-        // 
-        // Accounts
-        
+        Console.WriteLine(
+            $"[GET_CLIENT_ACCOUNTS] Status Code:{responseNegativeGetAccounts.StatusCode}"
+        );
+        // Console.WriteLine($"[CONTENT_GET_ACCOUNTS] Content:{responseNegativeGetAccounts.Content}");
+        Console.WriteLine(
+            $"[NEGATIVE_GET_CLIENT_CARDS] Status Code:{responseNegativeGetCards.StatusCode}"
+        );
+        // Console.WriteLine(
+        //     $"[NEGATIVE_CONTENT_GET_CARDS] Content:{responseNegativeGetCards.Content}"
+        // );
+        Console.WriteLine(
+            $"[NEGATIVE_GET_CLIENT_CARDS_ORDERS] Status Code:{responseNegativeGetCardsOrders.StatusCode}"
+        );
+        // Console.WriteLine(
+        //     $"[NEGATIVE_CONTENT_GET_CARDS_ORDERS] Content:{responseNegativeGetCardsOrders.Content}"
+        // );
 
-        var responseAccounts = await RequestsAuthorization.UniversalNegativeGetRequestAfterAuthorization("api/accounts",accessToken); 
-        Console.WriteLine($"NegativeTestAccounts-StatusCode:{responseAccounts.StatusCode}");
-        Console.WriteLine($"NegativeTestAccounts-Content:{responseAccounts.Content}");
-        // Console.WriteLine($"NegativeTestAccounts-AccessToken:{accessToken}");
-        
-        Assert.Equal(HttpStatusCode.Unauthorized, responseAccounts.StatusCode);
-
-        // Cards
-        var responseCards = await RequestsAuthorization.UniversalNegativeGetRequestAfterAuthorization("api/cards",accessToken); 
-        Console.WriteLine($"NegativeTestCards-StatusCode:{responseCards.StatusCode}");
-        Console.WriteLine($"NegativeTestCards-Content:{responseCards.Content}");
-        // Console.WriteLine($"NegativeTestCards-AccessToken:{accessToken}");
-        Assert.Equal(HttpStatusCode.Unauthorized, responseCards.StatusCode);
-
-        // CardsOrders
-        var responseCardsOrders = await RequestsAuthorization.UniversalNegativeGetRequestAfterAuthorization("api/cards/orders",accessToken); 
-        Console.WriteLine($"NegativeTestCardsOrders-StatusCode:{responseCardsOrders.StatusCode}");
-        Console.WriteLine($"NegativeTestCardsOrders-Content:{responseCardsOrders.Content}");
-        // Console.WriteLine($"NegativeTestCardsOrders-AccessToken:{accessToken}");
-        Assert.Equal(HttpStatusCode.Unauthorized, responseCardsOrders.StatusCode);
-
-
-       
-        
-
-        
-        
-
-
+        Assert.Equal(HttpStatusCode.Unauthorized, responseNegativeGetAccounts.StatusCode);
+        Assert.Equal(HttpStatusCode.Unauthorized, responseNegativeGetCards.StatusCode);
+        Assert.Equal(HttpStatusCode.Unauthorized, responseNegativeGetCardsOrders.StatusCode);
     }
 }

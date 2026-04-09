@@ -6,7 +6,7 @@ using Clients;
 namespace Operations;
 
 //
-public class AccountRefillTests
+public class TransferToAnotherAccount
 {
     private RequestsClients requestsClients = new RequestsClients();
     private RequestOperations requestOperations = new RequestOperations();
@@ -19,7 +19,7 @@ public class AccountRefillTests
     [Theory]
     // [InlineData("AccountRefill", "1000")]
     // [InlineData("AccountRefill", "0")]
-    [InlineData("AccountRefill", "10", 10.00)]
+    [InlineData("AccountTransfer", "10", 10.00)]
     // [InlineData("AccountRefill","Кредитная карта","Visa","lastname639111196098143429","name639111196098143429","middlenamfffffe639111196098143429","1971-12-18")]
     // можно написать все 8 тестов, но особого смысла в них нет, так как от них фукнционал никак не зависит и не меняется
 
@@ -61,18 +61,20 @@ public class AccountRefillTests
         // Console.WriteLine($"Value 0 {putData.StepParams[0].Values[0]}");
         // Console.WriteLine($"Value 1 {putData.StepParams[0].Values[1]}");
         Assert.NotNull(putData.StepParams);
-        var neededAccountNumber = "40843043375888642346";
+        var neededAccountNumber = "40838044348266100636";
 
         var accountValue = putData
-            .StepParams.First(x => x.Identifier == "Account")
+            .StepParams.First(x => x.Identifier == "SourceAccount")
             .Values?.FirstOrDefault(x => x.Contains(neededAccountNumber));
 
         Assert.NotNull(accountValue);
 
         var body = new List<OperationInfo>()
         {
-            new OperationInfo { Identifier = "Account", Value = accountValue },
+            new OperationInfo { Identifier = "SourceAccount", Value = accountValue },
+            new OperationInfo { Identifier = "ReceiverAccount", Value = "40873288080484314011" },
             new OperationInfo { Identifier = "Amount", Value = amount },
+            new OperationInfo { Identifier = "Comment", Value = "Hi" },
         };
 
         var (patchRequest, patchData) =
@@ -84,20 +86,26 @@ public class AccountRefillTests
             );
 
         // put
-        Console.WriteLine($"[ACCOUNT_REFILL_PUT_REQUEST] Status Code:{putRequest.StatusCode}");
-        Console.WriteLine($"[ACCOUNT_REFILL_PUT_REQUEST] RequestId:{putData.RequestId}");
-        Console.WriteLine($"[ACCOUNT_REFILL_PUT_REQUEST] IsConfirmed:{putData.IsConfirmed}");
-        Console.WriteLine($"[ACCOUNT_REFILL_PUT_REQUEST] IsFinished:{putData.IsFinished}");
+        Console.WriteLine($"[TRANSFER_TO_ACCOUNT_PUT_REQUEST] Status Code:{putRequest.StatusCode}");
+        Console.WriteLine($"[TRANSFER_TO_ACCOUNT_PUT_REQUEST] RequestId:{putData.RequestId}");
+        Console.WriteLine($"[TRANSFER_TO_ACCOUNT_PUT_REQUEST] IsConfirmed:{putData.IsConfirmed}");
+        Console.WriteLine($"[TRANSFER_TO_ACCOUNT_PUT_REQUEST] IsFinished:{putData.IsFinished}");
         // patch
-        Console.WriteLine($"[ACCOUNT_REFILL_PATCH_REQUEST] Status Code:{patchRequest.StatusCode}");
-        Console.WriteLine($"[ACCOUNT_REFILL_PATCH_REQUEST] RequestId:{patchData.RequestId}");
-        Console.WriteLine($"[ACCOUNT_REFILL_PATCH_REQUEST] IsConfirmed:{patchData.IsConfirmed}");
-        Console.WriteLine($"[ACCOUNT_REFILL_PATCH_REQUEST] IsFinished:{patchData.IsFinished}");
+        Console.WriteLine(
+            $"[TRANSFER_TO_ACCOUNT_PATCH_REQUEST] Status Code:{patchRequest.StatusCode}"
+        );
+        Console.WriteLine($"[TRANSFER_TO_ACCOUNT_PATCH_REQUEST] RequestId:{patchData.RequestId}");
+        Console.WriteLine(
+            $"[TRANSFER_TO_ACCOUNT_PATCH_REQUEST] IsConfirmed:{patchData.IsConfirmed}"
+        );
+        Console.WriteLine($"[TRANSFER_TO_ACCOUNT_PATCH_REQUEST] IsFinished:{patchData.IsFinished}");
         // post
-        Console.WriteLine($"[ACCOUNT_REFILL_POST_REQUEST] Status Code:{postRequest.StatusCode}");
-        Console.WriteLine($"[ACCOUNT_REFILL_POST_REQUEST] RequestId:{postData.RequestId}");
-        Console.WriteLine($"[ACCOUNT_REFILL_POST_REQUEST] IsConfirmed:{postData.IsConfirmed}");
-        Console.WriteLine($"[ACCOUNT_REFILL_POST_REQUEST] IsFinished:{postData.IsFinished}");
+        Console.WriteLine(
+            $"[TRANSFER_TO_ACCOUNT_POST_REQUEST] Status Code:{postRequest.StatusCode}"
+        );
+        Console.WriteLine($"[TRANSFER_TO_ACCOUNT_POST_REQUEST] RequestId:{postData.RequestId}");
+        Console.WriteLine($"[TRANSFER_TO_ACCOUNT_POST_REQUEST] IsConfirmed:{postData.IsConfirmed}");
+        Console.WriteLine($"[TRANSFER_TO_ACCOUNT_POST_REQUEST] IsFinished:{postData.IsFinished}");
         Console.WriteLine(accessToken);
         //
         await Task.Delay(5000);
@@ -105,7 +113,7 @@ public class AccountRefillTests
             .FirstOrDefault(x => x.Number == neededAccountNumber)
             ?.Balance;
         var beforeBalance = Convert.ToDecimal(beforeAccount);
-        Console.WriteLine($"[BEFORE_ACCOUNT]:{accountValue}");
+        Console.WriteLine($"[BEFORE_TRANSFER]:{accountValue}");
 
         var responseGetClient = await requestsClients.GetRequestForEndpointClients(
             "api/accounts",
@@ -119,7 +127,7 @@ public class AccountRefillTests
         var afterAccount = getDataAfterCreateClientDeserialize
             .FirstOrDefault(x => x.Number == neededAccountNumber)
             ?.Balance;
-        Console.WriteLine($"[AFTER_ACCOUNT]:{afterAccount}");
+        Console.WriteLine($"[AFTER_TRANSFER]:{afterAccount}");
         // Console.WriteLine(beforeBalance + differenceAmount);
         // Console.WriteLine(afterAccount);
 
