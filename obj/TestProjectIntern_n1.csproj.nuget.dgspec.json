@@ -50,6 +50,10 @@
               "target": "Package",
               "version": "[17.14.1, )"
             },
+            "Polly": {
+              "target": "Package",
+              "version": "[8.6.6, )"
+            },
             "RestSharp": {
               "target": "Package",
               "version": "[114.0.0, )"

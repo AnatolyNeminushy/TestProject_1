@@ -1,7 +1,8 @@
-// Класс для хранения данных пользователя, можно как сериализовать данные, так и десериализовать.
-//
-namespace BaseSpaceRequest;
+namespace BaseSpaceRequests;
 
+/// <summary>
+/// Модель данных для хранения информации о пользователе
+/// </summary>
 public class DataClients
 {
     public string? PhoneNumber { get; set; }

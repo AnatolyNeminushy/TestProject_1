@@ -1,6 +1,9 @@
 namespace Operations;
 
-public class AccountInfo
+/// <summary>
+/// Модель данных для хранения информации о счете пользователя
+/// </summary>
+public class BankAccount
 {
     public int Id { get; set; }
     public string? Number { get; set; }

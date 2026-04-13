@@ -96,3 +96,5 @@ D:\TestProjectIntern_n1\obj\Debug\net10.0\TestProjectIntern_n1.pdb
 D:\TestProjectIntern_n1\obj\Debug\net10.0\TestProjectIntern_n1.genruntimeconfig.cache
 D:\TestProjectIntern_n1\obj\Debug\net10.0\ref\TestProjectIntern_n1.dll
 D:\TestProjectIntern_n1\obj\Debug\net10.0\TestProjectIntern_n1.sourcelink.json
+D:\TestProjectIntern_n1\bin\Debug\net10.0\Polly.dll
+D:\TestProjectIntern_n1\bin\Debug\net10.0\Polly.Core.dll
