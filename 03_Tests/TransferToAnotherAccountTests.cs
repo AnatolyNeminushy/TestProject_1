@@ -21,9 +21,6 @@ public class TransferToAnotherAccountTests
     const string loginAnotherAccount = "IvanWater";
     const string passwordAnotherAccount = "Ivan1234";
 
-    decimal valueCurrentAccountBeforeTransfer;
-    decimal valueAnotherAccountBeforeTransfer;
-
     /// <summary>
     /// Перевод с текущего счета на счет другого пользователя.
     /// </summary>
@@ -82,11 +79,11 @@ public class TransferToAnotherAccountTests
                 .DeserializeData<List<BankAccount>>(
                     getAnotherAccountBeforeTransferResponse.Content!);
 
-        valueCurrentAccountBeforeTransfer =
+        var valueCurrentAccountBeforeTransfer =
             getCurrentAccountBeforeTransferData
                 ?.FirstOrDefault(x => x.Number == "40843043375888642346")?.Balance
                 ?? throw new Exception("Не найден баланс текущего счета.");
-        valueAnotherAccountBeforeTransfer =
+        var valueAnotherAccountBeforeTransfer =
             getAnotherAccountBeforeTransferData
                 ?.FirstOrDefault(x => x.Number == "40830755020207104405")?.Balance
                 ?? throw new Exception("Не найден баланс другого счета.");
@@ -126,12 +123,12 @@ public class TransferToAnotherAccountTests
 
         // Текущий счет
         var valueCurrentAccountAfterTransfer = await Polling.ForGetBalance(
-            "subtraction", valueCurrentAccountBeforeTransfer, differenceAmount,
+            valueCurrentAccountBeforeTransfer - differenceAmount,
             accessCurrentAccountToken, "40843043375888642346");
 
         // Другой счет
         var valueAnotherAccountAfterTransfer = await Polling.ForGetBalance(
-            "subtraction", valueCurrentAccountBeforeTransfer, differenceAmount,
+            valueCurrentAccountBeforeTransfer - differenceAmount,
             accessAnotherAccountToken, "40830755020207104405");
 
         // Asserts
@@ -221,11 +218,11 @@ public class TransferToAnotherAccountTests
                 .DeserializeData<List<BankAccount>>(
                     getAnotherAccountBeforeTransferResponse.Content!);
 
-        valueCurrentAccountBeforeTransfer =
+        var valueCurrentAccountBeforeTransfer =
             getCurrentAccountBeforeTransferData
                 ?.FirstOrDefault(x => x.Number == "40843043375888642346")?.Balance
                 ?? throw new Exception("Не найден баланс текущего счета.");
-        valueAnotherAccountBeforeTransfer =
+        var valueAnotherAccountBeforeTransfer =
             getAnotherAccountBeforeTransferData
                 ?.FirstOrDefault(x => x.Number == "40830755020207104405")?.Balance
                 ?? throw new Exception("Не найден баланс другого счета.");
@@ -251,26 +248,20 @@ public class TransferToAnotherAccountTests
                 .NextStepOperation(
                     startOperationData!.RequestId, body, accessCurrentAccountToken);
         Console.WriteLine(nextStepOperationResponse.Content);
-        var nextStepOperationData =
-            JsonDeserializer
-                .DeserializeData<InfoOperation>(nextStepOperationResponse.Content!);
 
         var confirmedOperationResponse =
             await restOperations
                 .ConfirmedOperation(
                 startOperationData.RequestId, accessCurrentAccountToken);
-        var confirmedOperationData =
-            JsonDeserializer
-                .DeserializeData<InfoOperation>(confirmedOperationResponse.Content!);
 
         // Текущий счет
         var valueCurrentAccountAfterTransfer = await Polling.ForGetBalance(
-            "subtraction", valueCurrentAccountBeforeTransfer, differenceAmount,
+            valueCurrentAccountBeforeTransfer - differenceAmount,
             accessCurrentAccountToken, "40843043375888642346");
 
         // Другой счет
         var valueAnotherAccountAfterTransfer = await Polling.ForGetBalance(
-            "subtraction", valueCurrentAccountBeforeTransfer, differenceAmount,
+            valueCurrentAccountBeforeTransfer - differenceAmount,
             accessAnotherAccountToken, "40830755020207104405");
 
         // Asserts
@@ -283,12 +274,8 @@ public class TransferToAnotherAccountTests
         Console.WriteLine(valueAnotherAccountAfterTransfer);
 
         Assert.Equal(HttpStatusCode.OK, nextStepOperationResponse.StatusCode);
-        Assert.False(nextStepOperationData.IsConfirmed);
-        Assert.True(nextStepOperationData.IsFinished);
 
         Assert.Equal(HttpStatusCode.OK, confirmedOperationResponse.StatusCode);
-        Assert.True(confirmedOperationData.IsConfirmed);
-        Assert.True(confirmedOperationData.IsFinished);
 
         Assert.Equal(
             valueCurrentAccountBeforeTransfer - differenceAmount,

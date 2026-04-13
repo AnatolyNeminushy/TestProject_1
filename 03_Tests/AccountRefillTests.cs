@@ -53,7 +53,8 @@ public class AccountRefillTests
 
         var valueAccountBeforeAutorefill =
             getAccountBeforeAutorefillData
-                ?.FirstOrDefault(x => x.Number == "40875518618438343578")?.Balance;
+                ?.FirstOrDefault(x => x.Number == "40875518618438343578")?.Balance
+                ?? throw new Exception("Не найден баланс счета."); ;
 
         var startOperationResponse =
             await restOperations.StartOperation("AccountRefill", accessToken);
@@ -84,29 +85,9 @@ public class AccountRefillTests
             JsonDeserializer
                 .DeserializeData<InfoOperation>(confirmedOperationResponse.Content!);
 
-
-        var expectedBalance = valueAccountBeforeAutorefill + differenceAmount;
-        var policy = Policy<decimal>
-            .Handle<Exception>()
-            .OrResult(balance => balance != expectedBalance)
-            .WaitAndRetryAsync(60, n => TimeSpan.FromSeconds(1));
-
-        var valueAccountAfterAutorefill = await policy.ExecuteAsync(async () =>
-        {
-            var getAccountAfterAutorefillRequest =
-                restClients
-                    .CreateBaseRequest("api/accounts", Method.Get, accessToken);
-            var getAccountAfterAutorefillResponse =
-                await restClients
-                    .Client.ExecuteAsync(getAccountAfterAutorefillRequest);
-            var getAccountAfterAutorefillData =
-                JsonDeserializer
-                    .DeserializeData<List<BankAccount>>(
-                        getAccountAfterAutorefillResponse.Content);
-
-            return getAccountAfterAutorefillData
-                .FirstOrDefault(x => x.Number == "40875518618438343578")!.Balance;
-        });
+        var valueAccountAfterAutorefill = await Polling.ForGetBalance(
+            valueAccountBeforeAutorefill + differenceAmount,
+            accessToken, "40875518618438343578");
 
         // Asserts
         Assert.Equal(HttpStatusCode.OK, startOperationResponse.StatusCode);
@@ -164,7 +145,8 @@ public class AccountRefillTests
 
         var valueAccountBeforeAutorefill =
             getAccountBeforeAutorefillData
-                ?.FirstOrDefault(x => x.Number == "40875518618438343578")?.Balance;
+                ?.FirstOrDefault(x => x.Number == "40875518618438343578")?.Balance
+                ?? throw new Exception("Не найден баланс текущего счета."); ; ;
 
         var startOperationResponse =
             await restOperations.StartOperation("AccountRefill", accessToken);
@@ -189,30 +171,9 @@ public class AccountRefillTests
             await restOperations
                 .ConfirmedOperation(startOperationData.RequestId, accessToken);
 
-
-
-        var expectedBalance = valueAccountBeforeAutorefill + differenceAmount;
-        var policy = Policy<decimal>
-            .Handle<Exception>()
-            .OrResult(balance => balance != expectedBalance)
-            .WaitAndRetryAsync(60, n => TimeSpan.FromSeconds(1));
-
-        var valueAccountAfterAutorefill = await policy.ExecuteAsync(async () =>
-        {
-            var getAccountAfterAutorefillRequest =
-                restClients
-                    .CreateBaseRequest("api/accounts", Method.Get, accessToken);
-            var getAccountAfterAutorefillResponse =
-                await restClients
-                    .Client.ExecuteAsync(getAccountAfterAutorefillRequest);
-            var getAccountAfterAutorefillData =
-                JsonDeserializer
-                    .DeserializeData<List<BankAccount>>(
-                        getAccountAfterAutorefillResponse.Content);
-
-            return getAccountAfterAutorefillData
-                .FirstOrDefault(x => x.Number == "40875518618438343578")!.Balance;
-        });
+        var valueAccountAfterAutorefill = await Polling.ForGetBalance(
+            valueAccountBeforeAutorefill + differenceAmount,
+            accessToken, "40875518618438343578");
 
         // Asserts
         Assert.Equal(HttpStatusCode.OK, startOperationResponse.StatusCode);

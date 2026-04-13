@@ -98,34 +98,34 @@ public class AuthorizationTests
     [Theory]
     [InlineData("repfppdprgrp")]
     [InlineData("")]
-    public async Task NegativeAuthorizationClient_WithNonExistentAccessToken_ReturnsUnauthorized(
+    public async Task AuthorizationClient_WithNonExistentAccessToken_ReturnsUnauthorized(
         string accessToken)
     {
         // Arrange
-        var accountsNegativeRequest =
+        var accountsRequest =
             restClients
                 .CreateBaseRequest("api/accounts", Method.Get, accessToken);
-        var cardsNegativeRequest =
+        var cardsRequest =
             restClients
                 .CreateBaseRequest("api/cards", Method.Get, accessToken);
-        var cardsOrdersNegativeRequest =
+        var cardsOrdersRequest =
             restClients
                 .CreateBaseRequest("api/cards/orders", Method.Get, accessToken);
 
         // Act
-        var accountsNegativeResponse =
-            await restClients.Client.ExecuteAsync(accountsNegativeRequest);
-        var cardsNegativeResponse =
-            await restClients.Client.ExecuteAsync(cardsNegativeRequest);
-        var cardsOrdersNegativeResponse =
-            await restClients.Client.ExecuteAsync(cardsOrdersNegativeRequest);
+        var accountsResponse =
+            await restClients.Client.ExecuteAsync(accountsRequest);
+        var cardsResponse =
+            await restClients.Client.ExecuteAsync(cardsRequest);
+        var cardsOrdersResponse =
+            await restClients.Client.ExecuteAsync(cardsOrdersRequest);
 
         // Asserts
         Assert.Equal(
-            HttpStatusCode.Unauthorized, accountsNegativeResponse.StatusCode);
+            HttpStatusCode.Unauthorized, accountsResponse.StatusCode);
         Assert.Equal(
-            HttpStatusCode.Unauthorized, cardsNegativeResponse.StatusCode);
+            HttpStatusCode.Unauthorized, cardsResponse.StatusCode);
         Assert.Equal(
-            HttpStatusCode.Unauthorized, cardsOrdersNegativeResponse.StatusCode);
+            HttpStatusCode.Unauthorized, cardsOrdersResponse.StatusCode);
     }
 }

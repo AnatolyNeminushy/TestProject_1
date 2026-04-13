@@ -15,7 +15,7 @@ public class CreateClientTests
     // TODO приватный метод создать
 
 
-    private DataClients getDataClients(string nameParametr = null, string value = null)
+    private DataClients getDataClients()
     {
         var unique = DateTime.Now.Ticks;
         var random = new Random();
@@ -36,19 +36,6 @@ public class CreateClientTests
             Address = $"address{unique}",
             Birthdate = formattedDate,
             Password = $"password{unique}",
-        };
-        if (string.IsNullOrEmpty(nameParametr) || string.IsNullOrEmpty(value))
-        {
-            return data;
-        }
-        _ = nameParametr switch
-        {
-            "login" => data.Login = value,
-            "sex" => data.Sex = value,
-            "email" => data.Email = value,
-            "password" => data.Password = value,
-            "birthdate" => data.Birthdate = value,
-            _ => throw new ArgumentException("Неверный параметр")
         };
 
         return data;
@@ -138,7 +125,8 @@ public class CreateClientTests
         string sex)
     {
         // Arrange
-        var data = getDataClients("sex", sex);
+        var data = getDataClients();
+        data.Sex = sex;
         // Act
         var сreateClientResponse =
             await restClients.CreateClient(data);
@@ -162,7 +150,8 @@ public class CreateClientTests
         string email)
     {
         // Arrange
-        var data = getDataClients("email", email);
+        var data = getDataClients();
+        data.Email = email;
 
         // Act
         var сreateClientResponse =
@@ -184,7 +173,8 @@ public class CreateClientTests
        string login)
     {
         // Arrange
-        var data = getDataClients("login", login);
+        var data = getDataClients();
+        data.Login = login;
 
         // Act
         var сreateClientResponse =
@@ -208,7 +198,8 @@ public class CreateClientTests
        string password)
     {
         // Arrange
-        var data = getDataClients("password", password);
+        var data = getDataClients();
+        data.Password = password;
 
         // Act
         var сreateClientResponse =
@@ -231,7 +222,8 @@ public class CreateClientTests
    string birthdate)
     {
         // Arrange
-        var data = getDataClients("birthdate", birthdate);
+        var data = getDataClients();
+        data.Birthdate = birthdate;
 
         // Act
         var сreateClientResponse =
@@ -255,7 +247,8 @@ public class CreateClientTests
    string phonenumber)
     {
         // Arrange
-        var data = getDataClients("phonenumber", phonenumber);
+        var data = getDataClients();
+        data.PhoneNumber = phonenumber;
 
         // Act
         var сreateClientResponse =

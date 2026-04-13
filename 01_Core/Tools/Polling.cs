@@ -24,19 +24,9 @@ public class Polling
     /// <exception cref="ArgumentException">Исключение, 
     /// если выбрана невалидная арифметическая операция.</exception>
     public static async Task<decimal> ForGetBalance(
-        string arithmeticOperation,
-        decimal firstValue, decimal secondValue, string token, string account)
+        decimal expectedBalance, string token, string account)
     {
         var restClients = new RestClients();
-        decimal expectedBalance;
-
-        expectedBalance = arithmeticOperation switch
-        {
-            "addition" => firstValue + secondValue,
-            "subtraction" => firstValue - secondValue,
-            _ => throw new ArgumentException(
-                "Выберите операцию из предложенного списка: addition, subtraction")
-        };
 
         var policy = Policy<decimal>
             .Handle<Exception>()

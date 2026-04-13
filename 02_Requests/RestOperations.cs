@@ -16,14 +16,14 @@ public class RestOperations : BaseClient
     /// <returns> response объект с информацией об операции с параметрами </returns>
     public async Task<RestResponse> StartOperation(string operationCode, string accessToken)
     {
-        var putRequest = CreateBaseRequest("api/operations", Method.Put);
+        var startRequest = CreateBaseRequest("api/operations", Method.Put);
 
-        putRequest.AddHeader("Authorization", $"Bearer {accessToken}");
-        putRequest.AddJsonBody(new { operationCode = operationCode });
+        startRequest.AddHeader("Authorization", $"Bearer {accessToken}");
+        startRequest.AddJsonBody(new { operationCode = operationCode });
 
-        var responseRequest = await Client.ExecuteAsync(putRequest);
+        var startResponse = await Client.ExecuteAsync(startRequest);
 
-        return responseRequest;
+        return startResponse;
     }
 
     /// <summary>
@@ -35,15 +35,15 @@ public class RestOperations : BaseClient
     /// <returns> response объект с информацией об операции без параметров </returns>
     public async Task<RestResponse> NextStepOperation(int requestId, List<ParametrOperation> body, string accessToken)
     {
-        var patchRequest = CreateBaseRequest("api/operations", Method.Patch);
+        var nextStepRequest = CreateBaseRequest("api/operations", Method.Patch);
 
-        patchRequest.AddHeader("Authorization", $"Bearer {accessToken}");
-        patchRequest.AddQueryParameter("requestId", requestId);
-        patchRequest.AddJsonBody(body);
+        nextStepRequest.AddHeader("Authorization", $"Bearer {accessToken}");
+        nextStepRequest.AddQueryParameter("requestId", requestId);
+        nextStepRequest.AddJsonBody(body);
 
-        var responseRequest = await Client.ExecuteAsync(patchRequest);
+        var nextStepResponse = await Client.ExecuteAsync(nextStepRequest);
 
-        return responseRequest;
+        return nextStepResponse;
     }
 
     /// <summary>
@@ -54,13 +54,13 @@ public class RestOperations : BaseClient
     /// <returns> response объект с информацией об операции без параметров </returns>
     public async Task<RestResponse> ConfirmedOperation(int requestId, string accessToken)
     {
-        var createRequest = CreateBaseRequest("api/operations", Method.Post);
+        var confirmedRequest = CreateBaseRequest("api/operations", Method.Post);
 
-        createRequest.AddHeader("Authorization", $"Bearer {accessToken}");
-        createRequest.AddQueryParameter("requestId", requestId);
+        confirmedRequest.AddHeader("Authorization", $"Bearer {accessToken}");
+        confirmedRequest.AddQueryParameter("requestId", requestId);
 
-        var responseRequest = await Client.ExecuteAsync(createRequest);
+        var confirmedResponse = await Client.ExecuteAsync(confirmedRequest);
 
-        return responseRequest;
+        return confirmedResponse;
     }
 }
