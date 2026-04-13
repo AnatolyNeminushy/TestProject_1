@@ -124,6 +124,10 @@ public class CreateClientTests
             responseNegativeCreateClient.StatusCode);
     }
 
+    /// <summary>
+    /// Создание пользователя с невалидным sex.
+    /// </summary>
+    /// <param name="sex">Пол пользователя.</param>
     [Theory]
     [InlineData(null)]
     [InlineData("1234")]
@@ -144,6 +148,10 @@ public class CreateClientTests
             HttpStatusCode.UnprocessableContent, сreateClientResponse.StatusCode);
     }
 
+    /// <summary>
+    /// Создание пользователя с невалидным email.
+    /// </summary>
+    /// <param name="email">Почта пользователя.</param>
     [Theory]
     [InlineData(null)]
     [InlineData("")]
@@ -165,6 +173,10 @@ public class CreateClientTests
             HttpStatusCode.UnprocessableContent, сreateClientResponse.StatusCode);
     }
 
+    /// <summary>
+    /// Создание пользователя с невалидным login.
+    /// </summary>
+    /// <param name="login">Логин.</param>
     [Theory]
     [InlineData(null)]
     [InlineData("")]
@@ -183,6 +195,10 @@ public class CreateClientTests
             HttpStatusCode.UnprocessableContent, сreateClientResponse.StatusCode);
     }
 
+    /// <summary>
+    /// Создание пользователя с невалидным password.
+    /// </summary>
+    /// <param name="password">Пароль.</param>
     [Theory]
     [InlineData(null)]
     [InlineData("")]
@@ -203,6 +219,10 @@ public class CreateClientTests
             HttpStatusCode.UnprocessableContent, сreateClientResponse.StatusCode);
     }
 
+    /// <summary>
+    /// Создание пользователя с невалидным birthdate.
+    /// </summary>
+    /// <param name="birthdate">Дата рождения пользователя.</param>
     [Theory]
     [InlineData(null)]
     [InlineData("")]
@@ -222,6 +242,10 @@ public class CreateClientTests
             HttpStatusCode.UnprocessableContent, сreateClientResponse.StatusCode);
     }
 
+    /// <summary>
+    /// Создание пользователя с невалидным phonenumber.
+    /// </summary>
+    /// <param name="phonenumber"></param>
     [Theory]
     [InlineData(null)]
     [InlineData("")]

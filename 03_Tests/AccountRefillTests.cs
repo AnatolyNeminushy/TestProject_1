@@ -22,12 +22,8 @@ public class AccountRefillTests
     /// <summary>
     /// Пополнение счета с валидными данными.
     /// </summary>
-    [Theory]
-    [InlineData("10")]
-    [InlineData("0.1")]
-    [InlineData("5,1")]
-    public async Task AccountRefill_WithExistingDataClient_ReturnsOk(
-        string amount)
+    [Fact]
+    public async Task AccountRefill_WithExistingDataClient_ReturnsOk()
     {
         // Arrange
         decimal differenceAmount = 10.00m;
@@ -70,7 +66,7 @@ public class AccountRefillTests
             new ParametrOperation {
                 Identifier = "Account", Value = "[40875518618438343578]" },
             new ParametrOperation {
-                Identifier = "Amount", Value = amount },
+                Identifier = "Amount", Value = "10" },
         };
 
         var nextStepOperationResponse =
@@ -128,6 +124,103 @@ public class AccountRefillTests
         Assert.Equal(
             valueAccountBeforeAutorefill + differenceAmount,
             valueAccountAfterAutorefill);
+    }
+
+    /// <summary>
+    /// Пополнение счета суммы с копейками.
+    /// </summary>
+    /// <param name="amount">Сумаа.</param>
+    [Theory]
+    [InlineData("0.15")]
+    [InlineData("5,1")]
+    public async Task AccountRefill_WithPenny_ReturnsOk(
+        string amount)
+    {
+        // Arrange
+        decimal differenceAmount = 10.00m;
+
+        var authenticationResponse =
+            await authenticationToken
+                .RequestToObtainAuthenticationToken(login, password);
+
+        var authenticationData =
+            JsonDeserializer
+                .DeserializeData<DataClients>(authenticationResponse.Content!)
+                ?? throw new Exception("Ошибка при десериализации.");
+        var accessToken = authenticationData.AccessToken
+            ?? throw new Exception("Ошибка при получении токена.");
+
+        var getAccountBeforeAutorefillRequest =
+            restClients.CreateBaseRequest("api/accounts", Method.Get, accessToken);
+
+        // Act
+        var getAccountBeforeAutorefillResponse =
+            await restClients
+                .Client.ExecuteAsync(getAccountBeforeAutorefillRequest);
+        var getAccountBeforeAutorefillData =
+            JsonDeserializer
+                .DeserializeData<List<BankAccount>>(
+                    getAccountBeforeAutorefillResponse.Content!);
+
+        var valueAccountBeforeAutorefill =
+            getAccountBeforeAutorefillData
+                ?.FirstOrDefault(x => x.Number == "40875518618438343578")?.Balance;
+
+        var startOperationResponse =
+            await restOperations.StartOperation("AccountRefill", accessToken);
+        var startOperationData =
+            JsonDeserializer
+                .DeserializeData<InfoOperation>(startOperationResponse.Content!);
+
+        var body = new List<ParametrOperation>()
+        {
+            new ParametrOperation {
+                Identifier = "Account", Value = "[40875518618438343578]" },
+            new ParametrOperation {
+                Identifier = "Amount", Value = amount },
+        };
+
+        var nextStepOperationResponse =
+            await restOperations
+                .NextStepOperation(
+                    startOperationData!.RequestId, body, accessToken);
+
+        var confirmedOperationResponse =
+            await restOperations
+                .ConfirmedOperation(startOperationData.RequestId, accessToken);
+
+
+
+        var expectedBalance = valueAccountBeforeAutorefill + differenceAmount;
+        var policy = Policy<decimal>
+            .Handle<Exception>()
+            .OrResult(balance => balance != expectedBalance)
+            .WaitAndRetryAsync(60, n => TimeSpan.FromSeconds(1));
+
+        var valueAccountAfterAutorefill = await policy.ExecuteAsync(async () =>
+        {
+            var getAccountAfterAutorefillRequest =
+                restClients
+                    .CreateBaseRequest("api/accounts", Method.Get, accessToken);
+            var getAccountAfterAutorefillResponse =
+                await restClients
+                    .Client.ExecuteAsync(getAccountAfterAutorefillRequest);
+            var getAccountAfterAutorefillData =
+                JsonDeserializer
+                    .DeserializeData<List<BankAccount>>(
+                        getAccountAfterAutorefillResponse.Content);
+
+            return getAccountAfterAutorefillData
+                .FirstOrDefault(x => x.Number == "40875518618438343578")!.Balance;
+        });
+
+        // Asserts
+        Assert.Equal(HttpStatusCode.OK, startOperationResponse.StatusCode);
+        Assert.False(startOperationData.IsConfirmed);
+        Assert.False(startOperationData.IsFinished);
+
+        Assert.Equal(HttpStatusCode.OK, nextStepOperationResponse.StatusCode);
+
     }
 
     /// <summary>

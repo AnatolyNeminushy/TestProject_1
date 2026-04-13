@@ -31,7 +31,145 @@ public class TransferToAnotherAccountTests
     public async Task Transfer_WithExistingDataClient_ReturnsOk()
     {
         // Arrange
-        var amount = "10";
+        decimal differenceAmount = 10.00m;
+
+        // Токен для текущего счета
+        var authenticationCurrentAccountResponse =
+            await authenticationToken
+                .RequestToObtainAuthenticationToken(
+                    loginCurrentAccount, passwordCurrentAccount);
+        var authenticationCurrentAccountData =
+            JsonDeserializer
+                .DeserializeData<DataClients>(authenticationCurrentAccountResponse.Content!)
+                ?? throw new Exception("Ошибка при десериализации.");
+        var accessCurrentAccountToken = authenticationCurrentAccountData.AccessToken
+            ?? throw new Exception("Ошибка при получении токена.");
+
+        // Токен для другого счета
+        var authenticationAnotherAccountResponse =
+            await authenticationToken
+                .RequestToObtainAuthenticationToken(
+                    loginAnotherAccount, passwordAnotherAccount);
+        var authenticationAnotherAccountData =
+            JsonDeserializer
+                .DeserializeData<DataClients>(authenticationCurrentAccountResponse.Content!)
+                ?? throw new Exception("Ошибка при десериализации.");
+        var accessAnotherAccountToken = authenticationCurrentAccountData.AccessToken
+            ?? throw new Exception("Ошибка при получении токена.");
+
+        var getCurrentAccountBeforeTransferRequest =
+            restClients.CreateBaseRequest("api/accounts", Method.Get, accessCurrentAccountToken);
+
+        var getAnotherAccountBeforeTransferRequest =
+            restClients.CreateBaseRequest("api/accounts", Method.Get, accessAnotherAccountToken);
+
+        // Act
+        // Запросы текущего счета
+        var getCurrentAccountBeforeTransferResponse =
+            await restClients
+                .Client.ExecuteAsync(getCurrentAccountBeforeTransferRequest);
+        var getCurrentAccountBeforeTransferData =
+            JsonDeserializer
+                .DeserializeData<List<BankAccount>>(
+                    getCurrentAccountBeforeTransferResponse.Content!);
+
+        // Запросы другого счета
+        var getAnotherAccountBeforeTransferResponse =
+            await restClients
+                .Client.ExecuteAsync(getCurrentAccountBeforeTransferRequest);
+        var getAnotherAccountBeforeTransferData =
+            JsonDeserializer
+                .DeserializeData<List<BankAccount>>(
+                    getAnotherAccountBeforeTransferResponse.Content!);
+
+        valueCurrentAccountBeforeTransfer =
+            getCurrentAccountBeforeTransferData
+                ?.FirstOrDefault(x => x.Number == "40843043375888642346")?.Balance
+                ?? throw new Exception("Не найден баланс текущего счета.");
+        valueAnotherAccountBeforeTransfer =
+            getAnotherAccountBeforeTransferData
+                ?.FirstOrDefault(x => x.Number == "40830755020207104405")?.Balance
+                ?? throw new Exception("Не найден баланс другого счета.");
+
+        var startOperationResponse =
+           await restOperations.StartOperation("AccountTransfer", accessCurrentAccountToken);
+        var startOperationData =
+            JsonDeserializer
+                .DeserializeData<InfoOperation>(startOperationResponse.Content!);
+
+        var body = new List<ParametrOperation>()
+        {
+            new ParametrOperation {
+                Identifier = "SourceAccount", Value = "[40843043375888642346]" },
+            new ParametrOperation {
+                Identifier = "ReceiverAccount", Value = "40830755020207104405" },
+            new ParametrOperation {
+                Identifier = "Amount", Value = "10" },
+        };
+
+        var nextStepOperationResponse =
+            await restOperations
+                .NextStepOperation(
+                    startOperationData!.RequestId, body, accessCurrentAccountToken);
+        Console.WriteLine(nextStepOperationResponse.Content);
+        var nextStepOperationData =
+            JsonDeserializer
+                .DeserializeData<InfoOperation>(nextStepOperationResponse.Content!);
+
+        var confirmedOperationResponse =
+            await restOperations
+                .ConfirmedOperation(
+                startOperationData.RequestId, accessCurrentAccountToken);
+        var confirmedOperationData =
+            JsonDeserializer
+                .DeserializeData<InfoOperation>(confirmedOperationResponse.Content!);
+
+        // Текущий счет
+        var valueCurrentAccountAfterTransfer = await Polling.ForGetBalance(
+            "subtraction", valueCurrentAccountBeforeTransfer, differenceAmount,
+            accessCurrentAccountToken, "40843043375888642346");
+
+        // Другой счет
+        var valueAnotherAccountAfterTransfer = await Polling.ForGetBalance(
+            "subtraction", valueCurrentAccountBeforeTransfer, differenceAmount,
+            accessAnotherAccountToken, "40830755020207104405");
+
+        // Asserts
+        Assert.Equal(HttpStatusCode.OK, startOperationResponse.StatusCode);
+        Assert.False(startOperationData.IsConfirmed);
+        Assert.False(startOperationData.IsFinished);
+        Console.WriteLine(valueCurrentAccountBeforeTransfer);
+        Console.WriteLine(valueCurrentAccountAfterTransfer);
+        Console.WriteLine(valueAnotherAccountBeforeTransfer);
+        Console.WriteLine(valueAnotherAccountAfterTransfer);
+
+        Assert.Equal(HttpStatusCode.OK, nextStepOperationResponse.StatusCode);
+        Assert.False(nextStepOperationData.IsConfirmed);
+        Assert.True(nextStepOperationData.IsFinished);
+
+        Assert.Equal(HttpStatusCode.OK, confirmedOperationResponse.StatusCode);
+        Assert.True(confirmedOperationData.IsConfirmed);
+        Assert.True(confirmedOperationData.IsFinished);
+
+        Assert.Equal(
+            valueCurrentAccountBeforeTransfer - differenceAmount,
+            valueCurrentAccountAfterTransfer);
+        Assert.Equal(
+            valueAnotherAccountBeforeTransfer + differenceAmount,
+            valueAnotherAccountAfterTransfer);
+    }
+
+    /// <summary>
+    /// Перевод суммы с копейками.
+    /// </summary>
+    /// <param name="amount">Сумма.</param>
+    [Theory]
+    [InlineData("0.15")]
+    [InlineData("5,1")]
+    public async Task Transfer_WithPenny_ReturnsOk(
+        string amount)
+    {
+        // Arrange
         decimal differenceAmount = 10.00m;
 
         // Токен для текущего счета
@@ -159,7 +297,6 @@ public class TransferToAnotherAccountTests
             valueAnotherAccountBeforeTransfer + differenceAmount,
             valueAnotherAccountAfterTransfer);
     }
-
     /// <summary>
     /// Перевод с невалидным кодом операции.
     /// </summary>
