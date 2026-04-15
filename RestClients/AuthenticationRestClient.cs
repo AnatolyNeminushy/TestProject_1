@@ -6,7 +6,7 @@ namespace TestProjectIntern_n1.RestClients;
 /// <summary>
 /// Клиент для получения токена аутентификации.
 /// </summary>
-public class AuthenticationRestClient : BaseClientsRestClient
+public class AuthenticationRestClient : BaseRestClient
 {
     /// <summary>
     /// Получение токена аутентификации.

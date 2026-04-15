@@ -9,11 +9,8 @@ namespace TestProjectIntern_n1.Tests;
 /// <summary>
 /// Тесты на авторизацию.
 /// </summary>
-public class AuthorizationTests
+public class AuthorizationTests : BaseTests
 {
-    private ClientsRestClient restClients = new ClientsRestClient();
-    private AuthenticationRestClient authenticationClient = new AuthenticationRestClient();
-
     /// <summary>
     /// Авторизация с валидными данными пользователя.
     /// </summary>
@@ -37,21 +34,18 @@ public class AuthorizationTests
         // }
         //
 
-        var login = "DimaFire";
-        var password = "Dima5678";
-
-        var authenticationResponse = await authenticationClient.RequestToObtainAuthenticationToken(login, password);
+        var authenticationResponse = await AuthenticationRestClient.RequestToObtainAuthenticationToken(Login, Password);
         var authenticationData = JsonDeserializer.DeserializeData<DataClients>(authenticationResponse.Content);
         var accessToken = authenticationData.AccessToken;
 
-        var accountsRequest = restClients.CreateBaseRequest("api/accounts", Method.Get, accessToken);
-        var cardsRequest = restClients.CreateBaseRequest("api/cards", Method.Get, accessToken);
-        var cardsOrdersRequest = restClients.CreateBaseRequest("api/cards/orders", Method.Get, accessToken);
+        var accountsRequest = ClientsRestClient.CreateBaseRequest("api/accounts", Method.Get, accessToken);
+        var cardsRequest = ClientsRestClient.CreateBaseRequest("api/cards", Method.Get, accessToken);
+        var cardsOrdersRequest = ClientsRestClient.CreateBaseRequest("api/cards/orders", Method.Get, accessToken);
 
         // Act
-        var accountsResponse = await restClients.Client.ExecuteAsync(accountsRequest);
-        var cardsResponse = await restClients.Client.ExecuteAsync(cardsRequest);
-        var cardsOrdersResponse = await restClients.Client.ExecuteAsync(cardsOrdersRequest);
+        var accountsResponse = await ClientsRestClient.Client.ExecuteAsync(accountsRequest);
+        var cardsResponse = await ClientsRestClient.Client.ExecuteAsync(cardsRequest);
+        var cardsOrdersResponse = await ClientsRestClient.Client.ExecuteAsync(cardsOrdersRequest);
 
         // Asserts
         Assert.Equal(HttpStatusCode.OK, accountsResponse.StatusCode);
@@ -70,7 +64,7 @@ public class AuthorizationTests
         var password = "Dima5678";
 
         // Act
-        var authenticationResponse = await authenticationClient.RequestToObtainAuthenticationToken(login, password);
+        var authenticationResponse = await AuthenticationRestClient.RequestToObtainAuthenticationToken(login, password);
 
         // Asserts
         Assert.Equal(HttpStatusCode.BadRequest, authenticationResponse.StatusCode);
@@ -85,14 +79,14 @@ public class AuthorizationTests
     public async Task AuthorizationClient_WithNonExistentAccessToken_ReturnsUnauthorized(string accessToken)
     {
         // Arrange
-        var accountsRequest = restClients.CreateBaseRequest("api/accounts", Method.Get, accessToken);
-        var cardsRequest = restClients.CreateBaseRequest("api/cards", Method.Get, accessToken);
-        var cardsOrdersRequest = restClients.CreateBaseRequest("api/cards/orders", Method.Get, accessToken);
+        var accountsRequest = ClientsRestClient.CreateBaseRequest("api/accounts", Method.Get, accessToken);
+        var cardsRequest = ClientsRestClient.CreateBaseRequest("api/cards", Method.Get, accessToken);
+        var cardsOrdersRequest = ClientsRestClient.CreateBaseRequest("api/cards/orders", Method.Get, accessToken);
 
         // Act
-        var accountsResponse = await restClients.Client.ExecuteAsync(accountsRequest);
-        var cardsResponse = await restClients.Client.ExecuteAsync(cardsRequest);
-        var cardsOrdersResponse = await restClients.Client.ExecuteAsync(cardsOrdersRequest);
+        var accountsResponse = await ClientsRestClient.Client.ExecuteAsync(accountsRequest);
+        var cardsResponse = await ClientsRestClient.Client.ExecuteAsync(cardsRequest);
+        var cardsOrdersResponse = await ClientsRestClient.Client.ExecuteAsync(cardsOrdersRequest);
 
         // Asserts
         Assert.Equal(HttpStatusCode.Unauthorized, accountsResponse.StatusCode);

@@ -6,7 +6,7 @@ namespace TestProjectIntern_n1.RestClients;
 /// <summary>
 /// Клиент для совершения операций: создание счета, пополнения счета, заказа карты и перевода на другой счет.
 /// </summary>
-public class OperationsRestClient : BaseClientsRestClient
+public class OperationsRestClient : BaseRestClient
 {
     /// <summary>
     /// Отправление кода кода операции.

@@ -9,11 +9,12 @@ namespace TestProjectIntern_n1.Tests;
 /// <summary>
 /// Тесты на создание пользователя.
 /// </summary>
-public class CreateClientTests
+public class CreateClientTests : BaseTests
 {
-    private ClientsRestClient restClients = new ClientsRestClient();
-    private AuthenticationRestClient authenticationClient = new AuthenticationRestClient();
-
+    /// <summary>
+    /// Создание данных пользователя.
+    /// </summary>
+    /// <returns>Объект данных пользователя.</returns>
     private DataClients getDataClients()
     {
         var unique = DateTime.Now.Ticks;
@@ -49,16 +50,16 @@ public class CreateClientTests
         // Arrange
         var data = getDataClients();
 
-        var createClientResponse = await restClients.CreateClient(data);
+        var createClientResponse = await ClientsRestClient.CreateClient(data);
 
-        var authenticationResponse = await authenticationClient.RequestToObtainAuthenticationToken(data.Login, data.Password);
+        var authenticationResponse = await AuthenticationRestClient.RequestToObtainAuthenticationToken(data.Login, data.Password);
         var authenticationData = JsonDeserializer.DeserializeData<DataClients>(authenticationResponse.Content);
         var accessToken = authenticationData.AccessToken;
 
-        var getClientRequest = restClients.CreateBaseRequest("api/clients", Method.Get, accessToken);
+        var getClientRequest = ClientsRestClient.CreateBaseRequest("api/clients", Method.Get, accessToken);
 
         // Act
-        var getClientResponse = await restClients.Client.ExecuteAsync(getClientRequest);
+        var getClientResponse = await ClientsRestClient.Client.ExecuteAsync(getClientRequest);
         var getClientData = JsonDeserializer.DeserializeData<DataClients>(getClientResponse.Content);
 
         // Asserts
@@ -92,7 +93,7 @@ public class CreateClientTests
         };
 
         // Act
-        var responseNegativeCreateClient = await restClients.CreateClient(registeredDataClient);
+        var responseNegativeCreateClient = await ClientsRestClient.CreateClient(registeredDataClient);
 
         // Asserts
         Assert.Equal(HttpStatusCode.BadRequest, responseNegativeCreateClient.StatusCode);
@@ -114,7 +115,7 @@ public class CreateClientTests
         var data = getDataClients();
         data.Sex = sex;
         // Act
-        var сreateClientResponse = await restClients.CreateClient(data);
+        var сreateClientResponse = await ClientsRestClient.CreateClient(data);
 
         // Asserts
         Assert.Equal(HttpStatusCode.UnprocessableContent, сreateClientResponse.StatusCode);
@@ -137,7 +138,7 @@ public class CreateClientTests
         data.Email = email;
 
         // Act
-        var сreateClientResponse = await restClients.CreateClient(data);
+        var сreateClientResponse = await ClientsRestClient.CreateClient(data);
 
         // Asserts
         Assert.Equal(HttpStatusCode.UnprocessableContent, сreateClientResponse.StatusCode);
@@ -157,7 +158,7 @@ public class CreateClientTests
         data.Login = login;
 
         // Act
-        var сreateClientResponse = await restClients.CreateClient(data);
+        var сreateClientResponse = await ClientsRestClient.CreateClient(data);
 
         // Asserts
         Assert.Equal(HttpStatusCode.UnprocessableContent, сreateClientResponse.StatusCode);
@@ -179,7 +180,7 @@ public class CreateClientTests
         data.Password = password;
 
         // Act
-        var сreateClientResponse = await restClients.CreateClient(data);
+        var сreateClientResponse = await ClientsRestClient.CreateClient(data);
 
         // Asserts
         Assert.Equal(HttpStatusCode.UnprocessableContent, сreateClientResponse.StatusCode);
@@ -200,7 +201,7 @@ public class CreateClientTests
         data.Birthdate = birthdate;
 
         // Act
-        var сreateClientResponse = await restClients.CreateClient(data);
+        var сreateClientResponse = await ClientsRestClient.CreateClient(data);
 
         // Asserts
         Assert.Equal(HttpStatusCode.UnprocessableContent, сreateClientResponse.StatusCode);
@@ -222,7 +223,7 @@ public class CreateClientTests
         data.PhoneNumber = phonenumber;
 
         // Act
-        var сreateClientResponse = await restClients.CreateClient(data);
+        var сreateClientResponse = await ClientsRestClient.CreateClient(data);
 
         // Asserts
         Assert.Equal(HttpStatusCode.UnprocessableContent, сreateClientResponse.StatusCode);

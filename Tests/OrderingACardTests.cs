@@ -8,14 +8,8 @@ namespace TestProjectIntern_n1.Tests;
 /// <summary>
 /// Тесты на заказ карты.
 /// </summary>
-public class OrderingACardTests
+public class OrderingACardTests : BaseTests
 {
-    private const string login = "DimaFire";
-    private const string password = "Dima5678";
-
-    private OperationsRestClient restOperations = new OperationsRestClient();
-    private AuthenticationRestClient authenticationToken = new AuthenticationRestClient();
-
     /// <summary>
     /// Заказ карты с валидными параметрами.
     /// </summary>
@@ -40,18 +34,18 @@ public class OrderingACardTests
         };
 
         // Arrange
-        var authenticationResponse = await authenticationToken.RequestToObtainAuthenticationToken(login, password);
+        var authenticationResponse = await AuthenticationRestClient.RequestToObtainAuthenticationToken(Login, Password);
         var authenticationData = JsonDeserializer.DeserializeData<DataClients>(authenticationResponse.Content);
         var accessToken = authenticationData.AccessToken;
 
         // Act
-        var startOperationResponse = await restOperations.StartOperation("CardOrder", accessToken);
+        var startOperationResponse = await OperationsRestClient.StartOperation("CardOrder", accessToken);
         var startOperationData = JsonDeserializer.DeserializeData<InfoOperation>(startOperationResponse.Content);
 
-        var nextStepOperationResponse = await restOperations.NextStepOperation(startOperationData.RequestId, body, accessToken);
+        var nextStepOperationResponse = await OperationsRestClient.NextStepOperation(startOperationData.RequestId, body, accessToken);
         var nextStepOperationData = JsonDeserializer.DeserializeData<InfoOperation>(nextStepOperationResponse.Content);
 
-        var confirmedOperationResponse = await restOperations.ConfirmedOperation(startOperationData.RequestId, accessToken);
+        var confirmedOperationResponse = await OperationsRestClient.ConfirmedOperation(startOperationData.RequestId, accessToken);
         var confirmedOperationData = JsonDeserializer.DeserializeData<InfoOperation>(confirmedOperationResponse.Content);
 
         // Assert
@@ -80,16 +74,15 @@ public class OrderingACardTests
     public async Task OprderingACard_WithInvalidOperationCode_ReturnsBadRequest(string operationCode)
     {
         // Arrange
-        var authenticationResponse = await authenticationToken.RequestToObtainAuthenticationToken(login, password);
+        var authenticationResponse = await AuthenticationRestClient.RequestToObtainAuthenticationToken(Login, Password);
         var authenticationData = JsonDeserializer.DeserializeData<DataClients>(authenticationResponse.Content);
         var accessToken = authenticationData.AccessToken;
 
         // Act
-        var startOperationResponse = await restOperations.StartOperation(operationCode, accessToken);
+        var startOperationResponse = await OperationsRestClient.StartOperation(operationCode, accessToken);
 
         // Assert
-        Assert.Equal(
-            HttpStatusCode.BadRequest, startOperationResponse.StatusCode);
+        Assert.Equal(HttpStatusCode.BadRequest, startOperationResponse.StatusCode);
     }
 
     /// <summary>
@@ -99,12 +92,12 @@ public class OrderingACardTests
     public async Task OprderingACard_WithInvalidOperationNumberCode_ReturnsBadRequest()
     {
         // Arrange
-        var authenticationResponse = await authenticationToken.RequestToObtainAuthenticationToken(login, password);
+        var authenticationResponse = await AuthenticationRestClient.RequestToObtainAuthenticationToken(Login, Password);
         var authenticationData = JsonDeserializer.DeserializeData<DataClients>(authenticationResponse.Content);
         var accessToken = authenticationData.AccessToken;
 
         // Act
-        var startOperationResponse = await restOperations.StartOperation("1", accessToken);
+        var startOperationResponse = await OperationsRestClient.StartOperation("1", accessToken);
 
         // Assert
         Assert.Equal(HttpStatusCode.InternalServerError, startOperationResponse.StatusCode);
@@ -133,17 +126,17 @@ public class OrderingACardTests
             new ParametrOperation { Identifier = "Birthdate", Value = "1998-12-06" },
         };
 
-        var authenticationResponse = await authenticationToken.RequestToObtainAuthenticationToken(login, password);
+        var authenticationResponse = await AuthenticationRestClient.RequestToObtainAuthenticationToken(Login, Password);
         var authenticationData = JsonDeserializer.DeserializeData<DataClients>(authenticationResponse.Content);
         var accessToken = authenticationData.AccessToken;
 
         // Act
-        var startOperationResponse = await restOperations.StartOperation("CardOrder", accessToken);
+        var startOperationResponse = await OperationsRestClient.StartOperation("CardOrder", accessToken);
         var startOperationData = JsonDeserializer.DeserializeData<InfoOperation>(startOperationResponse.Content);
 
-        var nextStepOperationResponse = await restOperations.NextStepOperation(startOperationData.RequestId, body, accessToken);
+        var nextStepOperationResponse = await OperationsRestClient.NextStepOperation(startOperationData.RequestId, body, accessToken);
 
-        var confirmedOperationResponse = await restOperations.ConfirmedOperation(startOperationData.RequestId, accessToken);
+        var confirmedOperationResponse = await OperationsRestClient.ConfirmedOperation(startOperationData.RequestId, accessToken);
 
         // Asserts
         Assert.Equal(HttpStatusCode.OK, startOperationResponse.StatusCode);

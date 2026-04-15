@@ -6,9 +6,17 @@ namespace TestProjectIntern_n1.RestClients;
 /// <summary>
 /// Базовый клиент для запросов.
 /// </summary>
-public class BaseClientsRestClient
+public class BaseRestClient
 {
-    public BaseClientsRestClient()
+    /// <summary>
+    /// Rest клиент.
+    /// </summary>
+    public readonly RestClient Client;
+
+    /// <summary>
+    /// TODO - комменты
+    /// </summary>
+    public BaseRestClient()
     {
         Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
         Console.InputEncoding = Encoding.UTF8;
@@ -17,8 +25,6 @@ public class BaseClientsRestClient
         var options = new RestClientOptions("https://itester.online/") { Encoding = Encoding.UTF8 };
         Client = new RestClient(options);
     }
-
-    public readonly RestClient Client;
 
     /// <summary>
     /// Создание базового запроса.

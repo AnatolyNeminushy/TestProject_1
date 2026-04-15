@@ -9,17 +9,8 @@ namespace TestProjectIntern_n1.Tests;
 /// <summary>
 /// Тесты на переводы на другие баноковские счета.
 /// </summary>
-public class TransferToAnotherAccountTests
+public class TransferToAnotherAccountTests : BaseTests
 {
-    const string loginCurrentAccount = "DimaFire";
-    const string passwordCurrentAccount = "Dima5678";
-    const string loginAnotherAccount = "IvanWater";
-    const string passwordAnotherAccount = "Ivan1234";
-
-    private ClientsRestClient restClients = new ClientsRestClient();
-    private OperationsRestClient restOperations = new OperationsRestClient();
-    private AuthenticationRestClient authenticationToken = new AuthenticationRestClient();
-
     /// <summary>
     /// Перевод с текущего счета на счет другого пользователя.
     /// </summary>
@@ -27,38 +18,36 @@ public class TransferToAnotherAccountTests
     public async Task Transfer_WithExistingDataClient_ReturnsOk()
     {
         // Arrange
-        decimal differenceAmount = 10.00m;
-
         // Токен для текущего счета
-        var authenticationCurrentAccountResponse = await authenticationToken.RequestToObtainAuthenticationToken(
-                    loginCurrentAccount,
-                    passwordCurrentAccount);
+        var authenticationCurrentAccountResponse = await AuthenticationRestClient.RequestToObtainAuthenticationToken(
+                    LoginCurrentAccount,
+                    PasswordCurrentAccount);
         var authenticationCurrentAccountData = JsonDeserializer.DeserializeData<DataClients>(authenticationCurrentAccountResponse.Content!)
             ?? throw new Exception("Ошибка при десериализации.");
         var accessCurrentAccountToken = authenticationCurrentAccountData.AccessToken
             ?? throw new Exception("Ошибка при получении токена.");
 
         // Токен для другого счета
-        var authenticationAnotherAccountResponse = await authenticationToken.RequestToObtainAuthenticationToken(
-                    loginAnotherAccount,
-                    passwordAnotherAccount);
+        var authenticationAnotherAccountResponse = await AuthenticationRestClient.RequestToObtainAuthenticationToken(
+                    LoginAnotherAccount,
+                    PasswordAnotherAccount);
         var authenticationAnotherAccountData = JsonDeserializer.DeserializeData<DataClients>(authenticationCurrentAccountResponse.Content!)
             ?? throw new Exception("Ошибка при десериализации.");
         var accessAnotherAccountToken = authenticationCurrentAccountData.AccessToken
             ?? throw new Exception("Ошибка при получении токена.");
 
-        var getCurrentAccountBeforeTransferRequest = restClients.CreateBaseRequest("api/accounts", Method.Get, accessCurrentAccountToken);
+        var getCurrentAccountBeforeTransferRequest = ClientsRestClient.CreateBaseRequest("api/accounts", Method.Get, accessCurrentAccountToken);
 
-        var getAnotherAccountBeforeTransferRequest = restClients.CreateBaseRequest("api/accounts", Method.Get, accessAnotherAccountToken);
+        var getAnotherAccountBeforeTransferRequest = ClientsRestClient.CreateBaseRequest("api/accounts", Method.Get, accessAnotherAccountToken);
 
         // Act
         // Запросы текущего счета
-        var getCurrentAccountBeforeTransferResponse = await restClients.Client.ExecuteAsync(getCurrentAccountBeforeTransferRequest);
+        var getCurrentAccountBeforeTransferResponse = await ClientsRestClient.Client.ExecuteAsync(getCurrentAccountBeforeTransferRequest);
         var getCurrentAccountBeforeTransferData = JsonDeserializer.DeserializeData<List<BankAccount>>(
                     getCurrentAccountBeforeTransferResponse.Content!);
 
         // Запросы другого счета
-        var getAnotherAccountBeforeTransferResponse = await restClients.Client.ExecuteAsync(getCurrentAccountBeforeTransferRequest);
+        var getAnotherAccountBeforeTransferResponse = await ClientsRestClient.Client.ExecuteAsync(getCurrentAccountBeforeTransferRequest);
         var getAnotherAccountBeforeTransferData = JsonDeserializer.DeserializeData<List<BankAccount>>(
                     getAnotherAccountBeforeTransferResponse.Content!);
 
@@ -71,7 +60,7 @@ public class TransferToAnotherAccountTests
                 ?.Balance
                 ?? throw new Exception("Не найден баланс другого счета.");
 
-        var startOperationResponse = await restOperations.StartOperation("AccountTransfer", accessCurrentAccountToken);
+        var startOperationResponse = await OperationsRestClient.StartOperation("AccountTransfer", accessCurrentAccountToken);
         var startOperationData = JsonDeserializer.DeserializeData<InfoOperation>(startOperationResponse.Content!);
 
         var body = new List<ParametrOperation>()
@@ -81,20 +70,20 @@ public class TransferToAnotherAccountTests
             new ParametrOperation { Identifier = "Amount", Value = "10" },
         };
 
-        var nextStepOperationResponse = await restOperations.NextStepOperation(startOperationData!.RequestId, body, accessCurrentAccountToken);
+        var nextStepOperationResponse = await OperationsRestClient.NextStepOperation(startOperationData!.RequestId, body, accessCurrentAccountToken);
         var nextStepOperationData = JsonDeserializer.DeserializeData<InfoOperation>(nextStepOperationResponse.Content!);
 
-        var confirmedOperationResponse = await restOperations.ConfirmedOperation(startOperationData.RequestId, accessCurrentAccountToken);
+        var confirmedOperationResponse = await OperationsRestClient.ConfirmedOperation(startOperationData.RequestId, accessCurrentAccountToken);
         var confirmedOperationData = JsonDeserializer.DeserializeData<InfoOperation>(confirmedOperationResponse.Content!);
 
         // Текущий счет
         var valueCurrentAccountAfterTransfer = await Polling.ForGetBalance(
-            valueCurrentAccountBeforeTransfer - differenceAmount,
+            valueCurrentAccountBeforeTransfer - DifferenceAmount,
             accessCurrentAccountToken, "40843043375888642346");
 
         // Другой счет
         var valueAnotherAccountAfterTransfer = await Polling.ForGetBalance(
-            valueCurrentAccountBeforeTransfer - differenceAmount,
+            valueCurrentAccountBeforeTransfer - DifferenceAmount,
             accessAnotherAccountToken, "40830755020207104405");
 
         // Asserts
@@ -114,8 +103,8 @@ public class TransferToAnotherAccountTests
         Assert.True(confirmedOperationData.IsConfirmed);
         Assert.True(confirmedOperationData.IsFinished);
 
-        Assert.Equal(valueCurrentAccountBeforeTransfer - differenceAmount, valueCurrentAccountAfterTransfer);
-        Assert.Equal(valueAnotherAccountBeforeTransfer + differenceAmount, valueAnotherAccountAfterTransfer);
+        Assert.Equal(valueCurrentAccountBeforeTransfer - DifferenceAmount, valueCurrentAccountAfterTransfer.Balance);
+        Assert.Equal(valueAnotherAccountBeforeTransfer + DifferenceAmount, valueAnotherAccountAfterTransfer.Balance);
     }
 
     /// <summary>
@@ -125,40 +114,37 @@ public class TransferToAnotherAccountTests
     [Theory]
     [InlineData("0.15")]
     [InlineData("5,1")]
-    public async Task Transfer_WithPenny_ReturnsOk(
-        string amount)
+    public async Task Transfer_WithPenny_ReturnsOk(string amount)
     {
         // Arrange
-        decimal differenceAmount = 10.00m;
-
         // Токен для текущего счета
-        var authenticationCurrentAccountResponse = await authenticationToken.RequestToObtainAuthenticationToken(
-                    loginCurrentAccount, passwordCurrentAccount);
+        var authenticationCurrentAccountResponse = await AuthenticationRestClient.RequestToObtainAuthenticationToken(
+                    LoginCurrentAccount, PasswordCurrentAccount);
         var authenticationCurrentAccountData = JsonDeserializer.DeserializeData<DataClients>(authenticationCurrentAccountResponse.Content!)
             ?? throw new Exception("Ошибка при десериализации.");
         var accessCurrentAccountToken = authenticationCurrentAccountData.AccessToken
             ?? throw new Exception("Ошибка при получении токена.");
 
         // Токен для другого счета
-        var authenticationAnotherAccountResponse = await authenticationToken.RequestToObtainAuthenticationToken(
-                    loginAnotherAccount, passwordAnotherAccount);
+        var authenticationAnotherAccountResponse = await AuthenticationRestClient.RequestToObtainAuthenticationToken(
+                    LoginAnotherAccount, PasswordAnotherAccount);
         var authenticationAnotherAccountData = JsonDeserializer.DeserializeData<DataClients>(authenticationCurrentAccountResponse.Content!)
             ?? throw new Exception("Ошибка при десериализации.");
         var accessAnotherAccountToken = authenticationCurrentAccountData.AccessToken
             ?? throw new Exception("Ошибка при получении токена.");
 
-        var getCurrentAccountBeforeTransferRequest = restClients.CreateBaseRequest("api/accounts", Method.Get, accessCurrentAccountToken);
+        var getCurrentAccountBeforeTransferRequest = ClientsRestClient.CreateBaseRequest("api/accounts", Method.Get, accessCurrentAccountToken);
 
-        var getAnotherAccountBeforeTransferRequest = restClients.CreateBaseRequest("api/accounts", Method.Get, accessAnotherAccountToken);
+        var getAnotherAccountBeforeTransferRequest = ClientsRestClient.CreateBaseRequest("api/accounts", Method.Get, accessAnotherAccountToken);
 
         // Act
         // Запросы текущего счета
-        var getCurrentAccountBeforeTransferResponse = await restClients.Client.ExecuteAsync(getCurrentAccountBeforeTransferRequest);
+        var getCurrentAccountBeforeTransferResponse = await ClientsRestClient.Client.ExecuteAsync(getCurrentAccountBeforeTransferRequest);
         var getCurrentAccountBeforeTransferData = JsonDeserializer.DeserializeData<List<BankAccount>>(
                     getCurrentAccountBeforeTransferResponse.Content!);
 
         // Запросы другого счета
-        var getAnotherAccountBeforeTransferResponse = await restClients.Client.ExecuteAsync(getCurrentAccountBeforeTransferRequest);
+        var getAnotherAccountBeforeTransferResponse = await ClientsRestClient.Client.ExecuteAsync(getCurrentAccountBeforeTransferRequest);
         var getAnotherAccountBeforeTransferData = JsonDeserializer.DeserializeData<List<BankAccount>>(
                     getAnotherAccountBeforeTransferResponse.Content!);
 
@@ -169,7 +155,7 @@ public class TransferToAnotherAccountTests
                 ?.FirstOrDefault(x => x.Number == "40830755020207104405")?.Balance
                 ?? throw new Exception("Не найден баланс другого счета.");
 
-        var startOperationResponse = await restOperations.StartOperation("AccountTransfer", accessCurrentAccountToken);
+        var startOperationResponse = await OperationsRestClient.StartOperation("AccountTransfer", accessCurrentAccountToken);
         var startOperationData = JsonDeserializer.DeserializeData<InfoOperation>(startOperationResponse.Content!);
 
         var body = new List<ParametrOperation>()
@@ -179,20 +165,20 @@ public class TransferToAnotherAccountTests
             new ParametrOperation { Identifier = "Amount", Value = amount },
         };
 
-        var nextStepOperationResponse = await restOperations.NextStepOperation(
+        var nextStepOperationResponse = await OperationsRestClient.NextStepOperation(
             startOperationData!.RequestId, body, accessCurrentAccountToken);
 
-        var confirmedOperationResponse = await restOperations.ConfirmedOperation(
+        var confirmedOperationResponse = await OperationsRestClient.ConfirmedOperation(
                 startOperationData.RequestId, accessCurrentAccountToken);
 
         // Текущий счет
         var valueCurrentAccountAfterTransfer = await Polling.ForGetBalance(
-            valueCurrentAccountBeforeTransfer - differenceAmount,
+            valueCurrentAccountBeforeTransfer - DifferenceAmount,
             accessCurrentAccountToken, "40843043375888642346");
 
         // Другой счет
         var valueAnotherAccountAfterTransfer = await Polling.ForGetBalance(
-            valueCurrentAccountBeforeTransfer - differenceAmount,
+            valueCurrentAccountBeforeTransfer - DifferenceAmount,
             accessAnotherAccountToken, "40830755020207104405");
 
         // Asserts
@@ -208,8 +194,8 @@ public class TransferToAnotherAccountTests
 
         Assert.Equal(HttpStatusCode.OK, confirmedOperationResponse.StatusCode);
 
-        Assert.Equal(valueCurrentAccountBeforeTransfer - differenceAmount, valueCurrentAccountAfterTransfer);
-        Assert.Equal(valueAnotherAccountBeforeTransfer + differenceAmount, valueAnotherAccountAfterTransfer);
+        Assert.Equal(valueCurrentAccountBeforeTransfer - DifferenceAmount, valueCurrentAccountAfterTransfer.Balance);
+        Assert.Equal(valueAnotherAccountBeforeTransfer + DifferenceAmount, valueAnotherAccountAfterTransfer.Balance);
     }
     /// <summary>
     /// Перевод с невалидным кодом операции.
@@ -220,17 +206,16 @@ public class TransferToAnotherAccountTests
     [InlineData("")]
     [InlineData(null)]
     [InlineData("&*#&@-")]
-    public async Task Transfer_WithInvalidOperationCode_ReturnsBadRequest(
-        string operationCode)
+    public async Task Transfer_WithInvalidOperationCode_ReturnsBadRequest(string operationCode)
     {
         // Arrange
-        var authenticationResponse = await authenticationToken.RequestToObtainAuthenticationToken(
-                loginCurrentAccount, passwordCurrentAccount);
+        var authenticationResponse = await AuthenticationRestClient.RequestToObtainAuthenticationToken(
+                LoginCurrentAccount, PasswordCurrentAccount);
         var authenticationData = JsonDeserializer.DeserializeData<DataClients>(authenticationResponse.Content!);
         var accessToken = authenticationData?.AccessToken!;
 
         // Act
-        var startOperationResponse = await restOperations.StartOperation(operationCode, accessToken);
+        var startOperationResponse = await OperationsRestClient.StartOperation(operationCode, accessToken);
 
         // Asserts
         Assert.Equal(HttpStatusCode.BadRequest, startOperationResponse.StatusCode);
@@ -243,13 +228,13 @@ public class TransferToAnotherAccountTests
     public async Task Transfer_WithInvalidOperationNumberCode_ReturnsBadRequest()
     {
         // Arrange
-        var authenticationResponse = await authenticationToken.RequestToObtainAuthenticationToken(
-                loginCurrentAccount, passwordCurrentAccount);
+        var authenticationResponse = await AuthenticationRestClient.RequestToObtainAuthenticationToken(
+                LoginCurrentAccount, PasswordCurrentAccount);
         var authenticationData = JsonDeserializer.DeserializeData<DataClients>(authenticationResponse.Content!);
         var accessToken = authenticationData?.AccessToken!;
 
         // Act
-        var startOperationResponse = await restOperations.StartOperation("1", accessToken);
+        var startOperationResponse = await OperationsRestClient.StartOperation("1", accessToken);
 
         // Asserts
         Assert.Equal(HttpStatusCode.InternalServerError, startOperationResponse.StatusCode);
@@ -267,15 +252,15 @@ public class TransferToAnotherAccountTests
         string amount)
     {
         // Arrange
-        var authenticationResponse = await authenticationToken.RequestToObtainAuthenticationToken(
-                loginCurrentAccount, passwordCurrentAccount);
+        var authenticationResponse = await AuthenticationRestClient.RequestToObtainAuthenticationToken(
+                LoginCurrentAccount, PasswordCurrentAccount);
         var authenticationData = JsonDeserializer.DeserializeData<DataClients>(authenticationResponse.Content!)
             ?? throw new Exception("Ошибка при десериализации.");
         var accessToken = authenticationData.AccessToken
             ?? throw new Exception("Ошибка при получении токена.");
 
         // Act
-        var startOperationResponse = await restOperations.StartOperation("AccountTransfer", accessToken);
+        var startOperationResponse = await OperationsRestClient.StartOperation("AccountTransfer", accessToken);
         var startOperationData = JsonDeserializer.DeserializeData<InfoOperation>(startOperationResponse.Content!);
 
         var body = new List<ParametrOperation>()
@@ -285,10 +270,10 @@ public class TransferToAnotherAccountTests
             new ParametrOperation { Identifier = "Amount", Value = amount },
         };
 
-        var nextStepOperationResponse = await restOperations.NextStepOperation(
+        var nextStepOperationResponse = await OperationsRestClient.NextStepOperation(
             startOperationData!.RequestId, body, accessToken);
 
-        var confirmedOperationResponse = await restOperations.ConfirmedOperation(
+        var confirmedOperationResponse = await OperationsRestClient.ConfirmedOperation(
             startOperationData.RequestId, accessToken);
 
         // Asserts
@@ -310,15 +295,15 @@ public class TransferToAnotherAccountTests
         string amount)
     {
         // Arrange
-        var authenticationResponse = await authenticationToken.RequestToObtainAuthenticationToken(
-                loginCurrentAccount, passwordCurrentAccount);
+        var authenticationResponse = await AuthenticationRestClient.RequestToObtainAuthenticationToken(
+                LoginCurrentAccount, PasswordCurrentAccount);
         var authenticationData = JsonDeserializer.DeserializeData<DataClients>(authenticationResponse.Content!)
             ?? throw new Exception("Ошибка при десериализации.");
         var accessToken = authenticationData.AccessToken
             ?? throw new Exception("Ошибка при получении токена.");
 
         // Act
-        var startOperationResponse = await restOperations.StartOperation("AccountTransfer", accessToken);
+        var startOperationResponse = await OperationsRestClient.StartOperation("AccountTransfer", accessToken);
         var startOperationData = JsonDeserializer.DeserializeData<InfoOperation>(startOperationResponse.Content!);
 
         var body = new List<ParametrOperation>()
@@ -328,10 +313,10 @@ public class TransferToAnotherAccountTests
             new ParametrOperation { Identifier = "Amount", Value = amount },
         };
 
-        var nextStepOperationResponse = await restOperations.NextStepOperation(
+        var nextStepOperationResponse = await OperationsRestClient.NextStepOperation(
             startOperationData!.RequestId, body, accessToken);
 
-        var confirmedOperationResponse = await restOperations.ConfirmedOperation(
+        var confirmedOperationResponse = await OperationsRestClient.ConfirmedOperation(
             startOperationData.RequestId, accessToken);
 
         // Asserts
@@ -358,15 +343,15 @@ public class TransferToAnotherAccountTests
         string currentAccount, string anotherAccount)
     {
         // Arrange
-        var authenticationResponse = await authenticationToken.RequestToObtainAuthenticationToken(
-                loginCurrentAccount, passwordCurrentAccount);
+        var authenticationResponse = await AuthenticationRestClient.RequestToObtainAuthenticationToken(
+                LoginCurrentAccount, PasswordCurrentAccount);
         var authenticationData = JsonDeserializer.DeserializeData<DataClients>(authenticationResponse.Content!)
             ?? throw new Exception("Ошибка при десериализации.");
         var accessToken = authenticationData.AccessToken
             ?? throw new Exception("Ошибка при получении токена.");
 
         // Act
-        var startOperationResponse = await restOperations.StartOperation("AccountTransfer", accessToken);
+        var startOperationResponse = await OperationsRestClient.StartOperation("AccountTransfer", accessToken);
         var startOperationData = JsonDeserializer.DeserializeData<InfoOperation>(startOperationResponse.Content!);
 
         var body = new List<ParametrOperation>()
@@ -376,10 +361,10 @@ public class TransferToAnotherAccountTests
             new ParametrOperation { Identifier = "Amount", Value = "10" },
         };
 
-        var nextStepOperationResponse = await restOperations.NextStepOperation(
+        var nextStepOperationResponse = await OperationsRestClient.NextStepOperation(
             startOperationData!.RequestId, body, accessToken);
 
-        var confirmedOperationResponse = await restOperations.ConfirmedOperation(
+        var confirmedOperationResponse = await OperationsRestClient.ConfirmedOperation(
             startOperationData.RequestId, accessToken);
 
         // Asserts
@@ -403,15 +388,15 @@ public class TransferToAnotherAccountTests
         string currentAccount, string anotherAccount)
     {
         // Arrange
-        var authenticationResponse = await authenticationToken.RequestToObtainAuthenticationToken(
-                loginCurrentAccount, passwordCurrentAccount);
+        var authenticationResponse = await AuthenticationRestClient.RequestToObtainAuthenticationToken(
+                LoginCurrentAccount, PasswordCurrentAccount);
         var authenticationData = JsonDeserializer.DeserializeData<DataClients>(authenticationResponse.Content!)
             ?? throw new Exception("Ошибка при десериализации.");
         var accessToken = authenticationData.AccessToken
             ?? throw new Exception("Ошибка при получении токена.");
 
         // Act
-        var startOperationResponse = await restOperations.StartOperation("AccountTransfer", accessToken);
+        var startOperationResponse = await OperationsRestClient.StartOperation("AccountTransfer", accessToken);
         var startOperationData = JsonDeserializer.DeserializeData<InfoOperation>(startOperationResponse.Content!);
 
         var body = new List<ParametrOperation>()
@@ -421,10 +406,10 @@ public class TransferToAnotherAccountTests
             new ParametrOperation { Identifier = "Amount", Value = "10" },
         };
 
-        var nextStepOperationResponse = await restOperations.NextStepOperation(
+        var nextStepOperationResponse = await OperationsRestClient.NextStepOperation(
             startOperationData!.RequestId, body, accessToken);
 
-        var confirmedOperationResponse = await restOperations.ConfirmedOperation(
+        var confirmedOperationResponse = await OperationsRestClient.ConfirmedOperation(
             startOperationData.RequestId, accessToken);
 
         // Asserts

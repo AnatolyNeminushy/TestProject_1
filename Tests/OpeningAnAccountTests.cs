@@ -1,4 +1,5 @@
-using System.Net;.using TestProjectIntern_n1.Core.ModelsData;
+using System.Net;
+using TestProjectIntern_n1.Core.ModelsData;
 using TestProjectIntern_n1.Core.Tools;
 using TestProjectIntern_n1.RestClients;
 
@@ -7,23 +8,16 @@ namespace TestProjectIntern_n1.Tests;
 /// <summary>
 /// Тесты на открытие банковского счета.             
 /// </summary>
-public class OpeningAnAccountTests
+public class OpeningAnAccountTests : BaseTests
 {
-    private const string login = "DimaFire";
-    private const string password = "Dima5678";
-
-    private OperationsRestClient restOperations = new OperationsRestClient();
-    private AuthenticationRestClient authenticationToken = new AuthenticationRestClient();
-
+    /// <summary>
+    /// Открытие банковского счета у зарегистрированного пользователя.
+    /// </summary>
     [Theory]
     [InlineData("Текущий счёт", "Российский Рубль")]
     [InlineData("Накопительный счёт", "Доллар США")]
     // можно написать все 8 тестов, но особого смысла в них нет,
     // так как от них фукнционал никак не зависит и не меняется
-
-    /// <summary>
-    /// Открытие банковского счета у зарегистрированного пользователя.
-    /// </summary>
     public async Task OpeningAnAccount_WithExistingDataClient_ReturnsOk(string accountType, string currency)
     {
         // Arrange
@@ -37,18 +31,18 @@ public class OpeningAnAccountTests
             new ParametrOperation { Identifier = "Birthdate", Value = "1998-12-06" },
         };
 
-        var authenticationResponse = await authenticationToken.RequestToObtainAuthenticationToken(login, password);
+        var authenticationResponse = await AuthenticationRestClient.RequestToObtainAuthenticationToken(Login, Password);
         var authenticationData = JsonDeserializer.DeserializeData<DataClients>(authenticationResponse.Content);
         var accessToken = authenticationData.AccessToken;
 
         // Act
-        var startOperationResponse = await restOperations.StartOperation("AccountOpen", accessToken);
+        var startOperationResponse = await OperationsRestClient.StartOperation("AccountOpen", accessToken);
         var startOperationData = JsonDeserializer.DeserializeData<InfoOperation>(startOperationResponse.Content);
 
-        var nextStepOperationResponse = await restOperations.NextStepOperation(startOperationData.RequestId, body, accessToken);
+        var nextStepOperationResponse = await OperationsRestClient.NextStepOperation(startOperationData.RequestId, body, accessToken);
         var nextStepOperationData = JsonDeserializer.DeserializeData<InfoOperation>(nextStepOperationResponse.Content);
 
-        var confirmedOperationResponse = await restOperations.ConfirmedOperation(startOperationData.RequestId, accessToken);
+        var confirmedOperationResponse = await OperationsRestClient.ConfirmedOperation(startOperationData.RequestId, accessToken);
         var confirmedOperationData = JsonDeserializer.DeserializeData<InfoOperation>(confirmedOperationResponse.Content);
 
         // Asserts
@@ -78,12 +72,12 @@ public class OpeningAnAccountTests
     public async Task OpeningAnAccount_WithInvalidOperationCode_ReturnsBadRequest(string operationCode)
     {
         // Arrange
-        var authenticationResponse = await authenticationToken.RequestToObtainAuthenticationToken(login, password);
+        var authenticationResponse = await AuthenticationRestClient.RequestToObtainAuthenticationToken(Login, Password);
         var authenticationData = JsonDeserializer.DeserializeData<DataClients>(authenticationResponse.Content);
         var accessToken = authenticationData.AccessToken;
 
         // Act
-        var startOperationResponse = await restOperations.StartOperation(operationCode, accessToken);
+        var startOperationResponse = await OperationsRestClient.StartOperation(operationCode, accessToken);
 
         // Assert
         Assert.Equal(HttpStatusCode.BadRequest, startOperationResponse.StatusCode);
@@ -97,12 +91,12 @@ public class OpeningAnAccountTests
     public async Task OpeningAnAccount_WithInvalidOperationNumberCode_ReturnsBadRequest()
     {
         // Arrange
-        var authenticationResponse = await authenticationToken.RequestToObtainAuthenticationToken(login, password);
+        var authenticationResponse = await AuthenticationRestClient.RequestToObtainAuthenticationToken(Login, Password);
         var authenticationData = JsonDeserializer.DeserializeData<DataClients>(authenticationResponse.Content);
         var accessToken = authenticationData.AccessToken;
 
         // Act
-        var startOperationResponse = await restOperations.StartOperation("1", accessToken);
+        var startOperationResponse = await OperationsRestClient.StartOperation("1", accessToken);
 
         // Assert
         Assert.Equal(HttpStatusCode.InternalServerError, startOperationResponse.StatusCode);
@@ -126,17 +120,17 @@ public class OpeningAnAccountTests
             new ParametrOperation { Identifier = "Birthdate", Value = "1998-12-06" },
         };
 
-        var authenticationResponse = await authenticationToken.RequestToObtainAuthenticationToken(login, password);
+        var authenticationResponse = await AuthenticationRestClient.RequestToObtainAuthenticationToken(Login, Password);
         var authenticationData = JsonDeserializer.DeserializeData<DataClients>(authenticationResponse.Content);
         var accessToken = authenticationData.AccessToken;
 
         // Act
-        var startOperationResponse = await restOperations.StartOperation("AccountOpen", accessToken);
+        var startOperationResponse = await OperationsRestClient.StartOperation("AccountOpen", accessToken);
         var startOperationData = JsonDeserializer.DeserializeData<InfoOperation>(startOperationResponse.Content);
 
-        var nextStepOperationResponse = await restOperations.NextStepOperation(startOperationData.RequestId, body, accessToken);
+        var nextStepOperationResponse = await OperationsRestClient.NextStepOperation(startOperationData.RequestId, body, accessToken);
 
-        var confirmedOperationResponse = await restOperations.ConfirmedOperation(startOperationData.RequestId, accessToken);
+        var confirmedOperationResponse = await OperationsRestClient.ConfirmedOperation(startOperationData.RequestId, accessToken);
 
         // Asserts
         Assert.Equal(HttpStatusCode.OK, startOperationResponse.StatusCode);

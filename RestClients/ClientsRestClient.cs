@@ -6,7 +6,7 @@ namespace TestProjectIntern_n1.RestClients;
 /// <summary>
 /// Клиент для создания пользователей.
 /// </summary>
-public class ClientsRestClient : BaseClientsRestClient
+public class ClientsRestClient : BaseRestClient
 {
     /// <summary>
     /// Создание пользователя.
