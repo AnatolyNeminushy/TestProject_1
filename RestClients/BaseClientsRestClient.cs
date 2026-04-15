@@ -1,14 +1,14 @@
 using RestSharp;
 using System.Text;
 
-namespace BaseSpaceRequests;
+namespace TestProjectIntern_n1.RestClients;
 
 /// <summary>
-/// Базовый клиент для запросов
+/// Базовый клиент для запросов.
 /// </summary>
-public class BaseClient
+public class BaseClientsRestClient
 {
-    public BaseClient()
+    public BaseClientsRestClient()
     {
         Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
         Console.InputEncoding = Encoding.UTF8;
@@ -21,11 +21,11 @@ public class BaseClient
     public readonly RestClient Client;
 
     /// <summary>
-    /// Создание базового запроса
+    /// Создание базового запроса.
     /// </summary>
-    /// <param name="resource">endpoint запроса</param>
-    /// <param name="method">http-метод запроса</param>
-    /// <returns>настроенный RestRequest объект</returns>
+    /// <param name="resource">Endpoint запроса.</param>
+    /// <param name="method">Http-метод запроса.</param>
+    /// <returns>Настроенный запрос.</returns>
     public RestRequest CreateBaseRequest(string resource, Method method, string accessToken = null)
     {
         var request = new RestRequest(resource, method);

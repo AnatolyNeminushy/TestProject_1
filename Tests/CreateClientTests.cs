@@ -1,19 +1,18 @@
-using BaseSpaceRequests;
 using RestSharp;
 using System.Net;
-using Tools;
+using TestProjectIntern_n1.Core.ModelsData;
+using TestProjectIntern_n1.Core.Tools;
+using TestProjectIntern_n1.RestClients;
 
-namespace Clients;
+namespace TestProjectIntern_n1.Tests;
 
 /// <summary>
 /// Тесты на создание пользователя.
 /// </summary>
 public class CreateClientTests
 {
-    private RestClients restClients = new RestClients();
-    private AuthenticationClient authenticationClient = new AuthenticationClient();
-    // TODO приватный метод создать
-
+    private ClientsRestClient restClients = new ClientsRestClient();
+    private AuthenticationRestClient authenticationClient = new AuthenticationRestClient();
 
     private DataClients getDataClients()
     {
@@ -52,24 +51,15 @@ public class CreateClientTests
 
         var createClientResponse = await restClients.CreateClient(data);
 
-        var authenticationResponse =
-            await authenticationClient
-                .RequestToObtainAuthenticationToken(data.Login, data.Password);
-        var authenticationData =
-            JsonDeserializer
-                .DeserializeData<DataClients>(authenticationResponse.Content);
+        var authenticationResponse = await authenticationClient.RequestToObtainAuthenticationToken(data.Login, data.Password);
+        var authenticationData = JsonDeserializer.DeserializeData<DataClients>(authenticationResponse.Content);
         var accessToken = authenticationData.AccessToken;
 
-        var getClientRequest =
-            restClients
-                .CreateBaseRequest("api/clients", Method.Get, accessToken);
+        var getClientRequest = restClients.CreateBaseRequest("api/clients", Method.Get, accessToken);
 
         // Act
-        var getClientResponse =
-            await restClients.Client.ExecuteAsync(getClientRequest);
-        var getClientData =
-            JsonDeserializer.DeserializeData<DataClients>(
-                getClientResponse.Content);
+        var getClientResponse = await restClients.Client.ExecuteAsync(getClientRequest);
+        var getClientData = JsonDeserializer.DeserializeData<DataClients>(getClientResponse.Content);
 
         // Asserts
         Assert.Equal(HttpStatusCode.OK, createClientResponse.StatusCode);
@@ -102,13 +92,10 @@ public class CreateClientTests
         };
 
         // Act
-        var responseNegativeCreateClient =
-            await restClients.CreateClient(registeredDataClient);
+        var responseNegativeCreateClient = await restClients.CreateClient(registeredDataClient);
 
         // Asserts
-        Assert.Equal(
-            HttpStatusCode.BadRequest,
-            responseNegativeCreateClient.StatusCode);
+        Assert.Equal(HttpStatusCode.BadRequest, responseNegativeCreateClient.StatusCode);
     }
 
     /// <summary>
@@ -121,19 +108,16 @@ public class CreateClientTests
     [InlineData("dfdgdg")]
     [InlineData("@#$$#")]
     [InlineData("")]
-    public async Task CreateNewClient_WithInvalidSex_ReturnsBadRequest(
-        string sex)
+    public async Task CreateNewClient_WithInvalidSex_ReturnsBadRequest(string sex)
     {
         // Arrange
         var data = getDataClients();
         data.Sex = sex;
         // Act
-        var сreateClientResponse =
-            await restClients.CreateClient(data);
+        var сreateClientResponse = await restClients.CreateClient(data);
 
         // Asserts
-        Assert.Equal(
-            HttpStatusCode.UnprocessableContent, сreateClientResponse.StatusCode);
+        Assert.Equal(HttpStatusCode.UnprocessableContent, сreateClientResponse.StatusCode);
     }
 
     /// <summary>
@@ -146,20 +130,17 @@ public class CreateClientTests
     [InlineData("1234")]
     [InlineData("dfdgdg")]
     [InlineData("@#$$#")]
-    public async Task CreateNewClient_WithInvalidEmail_ReturnsBadRequest(
-        string email)
+    public async Task CreateNewClient_WithInvalidEmail_ReturnsBadRequest(string email)
     {
         // Arrange
         var data = getDataClients();
         data.Email = email;
 
         // Act
-        var сreateClientResponse =
-            await restClients.CreateClient(data);
+        var сreateClientResponse = await restClients.CreateClient(data);
 
         // Asserts
-        Assert.Equal(
-            HttpStatusCode.UnprocessableContent, сreateClientResponse.StatusCode);
+        Assert.Equal(HttpStatusCode.UnprocessableContent, сreateClientResponse.StatusCode);
     }
 
     /// <summary>
@@ -169,20 +150,17 @@ public class CreateClientTests
     [Theory]
     [InlineData(null)]
     [InlineData("")]
-    public async Task CreateNewClient_WithInvalidLogin_ReturnsBadRequest(
-       string login)
+    public async Task CreateNewClient_WithInvalidLogin_ReturnsBadRequest(string login)
     {
         // Arrange
         var data = getDataClients();
         data.Login = login;
 
         // Act
-        var сreateClientResponse =
-            await restClients.CreateClient(data);
+        var сreateClientResponse = await restClients.CreateClient(data);
 
         // Asserts
-        Assert.Equal(
-            HttpStatusCode.UnprocessableContent, сreateClientResponse.StatusCode);
+        Assert.Equal(HttpStatusCode.UnprocessableContent, сreateClientResponse.StatusCode);
     }
 
     /// <summary>
@@ -194,20 +172,17 @@ public class CreateClientTests
     [InlineData("")]
     [InlineData("123456dfsd")]
     [InlineData("fkkoe454ldlsl343lssl5")]
-    public async Task CreateNewClient_WithInvalidPassword_ReturnsBadRequest(
-       string password)
+    public async Task CreateNewClient_WithInvalidPassword_ReturnsBadRequest(string password)
     {
         // Arrange
         var data = getDataClients();
         data.Password = password;
 
         // Act
-        var сreateClientResponse =
-            await restClients.CreateClient(data);
+        var сreateClientResponse = await restClients.CreateClient(data);
 
         // Asserts
-        Assert.Equal(
-            HttpStatusCode.UnprocessableContent, сreateClientResponse.StatusCode);
+        Assert.Equal(HttpStatusCode.UnprocessableContent, сreateClientResponse.StatusCode);
     }
 
     /// <summary>
@@ -218,20 +193,17 @@ public class CreateClientTests
     [InlineData(null)]
     [InlineData("")]
     [InlineData("2020-12-03")]
-    public async Task CreateNewClient_WithInvalidBirthDate_ReturnsBadRequest(
-   string birthdate)
+    public async Task CreateNewClient_WithInvalidBirthDate_ReturnsBadRequest(string birthdate)
     {
         // Arrange
         var data = getDataClients();
         data.Birthdate = birthdate;
 
         // Act
-        var сreateClientResponse =
-            await restClients.CreateClient(data);
+        var сreateClientResponse = await restClients.CreateClient(data);
 
         // Asserts
-        Assert.Equal(
-            HttpStatusCode.UnprocessableContent, сreateClientResponse.StatusCode);
+        Assert.Equal(HttpStatusCode.UnprocessableContent, сreateClientResponse.StatusCode);
     }
 
     /// <summary>
@@ -243,20 +215,17 @@ public class CreateClientTests
     [InlineData("")]
     [InlineData("+67050-5")]
     [InlineData("+798756778980")]
-    public async Task CreateNewClient_WithInvalidPhoneNumber_ReturnsBadRequest(
-   string phonenumber)
+    public async Task CreateNewClient_WithInvalidPhoneNumber_ReturnsBadRequest(string phonenumber)
     {
         // Arrange
         var data = getDataClients();
         data.PhoneNumber = phonenumber;
 
         // Act
-        var сreateClientResponse =
-            await restClients.CreateClient(data);
+        var сreateClientResponse = await restClients.CreateClient(data);
 
         // Asserts
-        Assert.Equal(
-            HttpStatusCode.UnprocessableContent, сreateClientResponse.StatusCode);
+        Assert.Equal(HttpStatusCode.UnprocessableContent, сreateClientResponse.StatusCode);
     }
 
 }

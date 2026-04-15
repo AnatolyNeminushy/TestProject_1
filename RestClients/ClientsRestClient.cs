@@ -1,17 +1,17 @@
-using BaseSpaceRequests;
 using RestSharp;
+using TestProjectIntern_n1.Core.ModelsData;
 
-namespace Clients;
+namespace TestProjectIntern_n1.RestClients;
 
 /// <summary>
-/// Клиент для создания пользователей
+/// Клиент для создания пользователей.
 /// </summary>
-public class RestClients : BaseClient
+public class ClientsRestClient : BaseClientsRestClient
 {
     /// <summary>
-    /// Запрос на создание пользователя
+    /// Создание пользователя.
     /// </summary>
-    /// <param name="data"> данные о пользователе </param>
+    /// <param name="data">Данные о пользователе.</param>
     public async Task<RestResponse> CreateClient(DataClients data)
     {
         var createRequest = CreateBaseRequest("api/clients", Method.Put);

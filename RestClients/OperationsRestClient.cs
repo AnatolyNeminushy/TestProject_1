@@ -1,19 +1,19 @@
-using BaseSpaceRequests;
 using RestSharp;
+using TestProjectIntern_n1.Core.ModelsData;
 
-namespace Operations;
+namespace TestProjectIntern_n1.RestClients;
 
 /// <summary>
-/// Клиент для совершения операций: создание счета, пополнения счета, заказа карты и перевода на другой счет
+/// Клиент для совершения операций: создание счета, пополнения счета, заказа карты и перевода на другой счет.
 /// </summary>
-public class RestOperations : BaseClient
+public class OperationsRestClient : BaseClientsRestClient
 {
     /// <summary>
-    /// Запрос на отправление кода операции
+    /// Отправление кода кода операции.
     /// </summary>
-    /// <param name="operationCode"> код операции </param>
-    /// <param name="accessToken"> токен аутентификации </param>
-    /// <returns> response объект с информацией об операции с параметрами </returns>
+    /// <param name="operationCode">Код операции.</param>
+    /// <param name="accessToken">Токен аутентификации.</param>
+    /// <returns>Объект с информацией об операции.</returns>
     public async Task<RestResponse> StartOperation(string operationCode, string accessToken)
     {
         var startRequest = CreateBaseRequest("api/operations", Method.Put);
@@ -27,12 +27,12 @@ public class RestOperations : BaseClient
     }
 
     /// <summary>
-    /// Запрос на отправку данных об операции
+    /// Отправление данных об операции.
     /// </summary>
-    /// <param name="requestId"> код запроса операции </param>
-    /// <param name="body"> тело запроса </param>
-    /// <param name="accessToken"> токен аутентификации </param>
-    /// <returns> response объект с информацией об операции без параметров </returns>
+    /// <param name="requestId">Id запроса операции.</param>
+    /// <param name="body">Тело запроса.</param>
+    /// <param name="accessToken">Токен аутентификации.</param>
+    /// <returns>Объект с информацией об операции.</returns>
     public async Task<RestResponse> NextStepOperation(int requestId, List<ParametrOperation> body, string accessToken)
     {
         var nextStepRequest = CreateBaseRequest("api/operations", Method.Patch);
@@ -47,11 +47,11 @@ public class RestOperations : BaseClient
     }
 
     /// <summary>
-    /// Запрос на подтверждение операции
+    /// Подтверждение операции.
     /// </summary>
-    /// <param name="requestId"> код запроса операции </param>
-    /// <param name="accessToken"> токен аутентификации </param>
-    /// <returns> response объект с информацией об операции без параметров </returns>
+    /// <param name="requestId">Код запроса операции.</param>
+    /// <param name="accessToken">Токен аутентификации.</param>
+    /// <returns>Объект с информацией об операции.</returns>
     public async Task<RestResponse> ConfirmedOperation(int requestId, string accessToken)
     {
         var confirmedRequest = CreateBaseRequest("api/operations", Method.Post);
