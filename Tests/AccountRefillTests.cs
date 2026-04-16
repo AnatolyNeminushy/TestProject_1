@@ -25,14 +25,11 @@ public class AccountRefillTests : BaseTest
             ?? throw new Exception("Ошибка при получении токена.");
 
         // Act
-        var getAccountBeforeAutorefillResponse = await AccountsRestClient.GetAccount(accessToken);
-        var getAccountBeforeAutorefillData = JsonDeserializer.DeserializeData<List<BankAccount>>(
+        var getAccountBeforeAutorefillResponse = await AccountsRestClient.GetAccount(11812, accessToken);
+        var getAccountBeforeAutorefillData = JsonDeserializer.DeserializeData<BankAccount>(
             getAccountBeforeAutorefillResponse.Content!);
 
-        var valueAccountBeforeAutorefill = getAccountBeforeAutorefillData
-            ?.FirstOrDefault(x => x.Number == "40875518618438343578")
-            ?.Balance
-            ?? throw new Exception("Не найден баланс счета."); ;
+        var valueAccountBeforeAutorefill = getAccountBeforeAutorefillData.Balance;
 
         var startOperationResponse = await OperationsRestClient.StartOperation("AccountRefill", accessToken);
         var startOperationData = JsonDeserializer.DeserializeData<InfoOperation>(startOperationResponse.Content!);
@@ -49,9 +46,10 @@ public class AccountRefillTests : BaseTest
         var confirmedOperationResponse = await OperationsRestClient.ConfirmedOperation(startOperationData.RequestId, accessToken);
         var confirmedOperationData = JsonDeserializer.DeserializeData<InfoOperation>(confirmedOperationResponse.Content!);
 
-        var valueAccountAfterAutorefill = await Polling.GetAccountAfterOperation(
+        var valueAccountAfterAutorefill = await AccountsRestClient.GetAccountAfterOperation(
+            11812,
             valueAccountBeforeAutorefill + DifferenceAmount,
-            accessToken, "40875518618438343578");
+            accessToken);
 
         // Asserts
         Assert.Equal(HttpStatusCode.OK, startOperationResponse.StatusCode);
@@ -87,14 +85,11 @@ public class AccountRefillTests : BaseTest
             ?? throw new Exception("Ошибка при получении токена.");
 
         // Act
-        var getAccountBeforeAutorefillResponse = await AccountsRestClient.GetAccount(accessToken);
-        var getAccountBeforeAutorefillData = JsonDeserializer.DeserializeData<List<BankAccount>>(
-                    getAccountBeforeAutorefillResponse.Content!);
+        var getAccountBeforeAutorefillResponse = await AccountsRestClient.GetAccount(11812, accessToken);
+        var getAccountBeforeAutorefillData = JsonDeserializer.DeserializeData<BankAccount>(
+            getAccountBeforeAutorefillResponse.Content!);
 
-        var valueAccountBeforeAutorefill = getAccountBeforeAutorefillData
-                ?.FirstOrDefault(x => x.Number == "40875518618438343578")
-                ?.Balance
-                ?? throw new Exception("Не найден баланс текущего счета."); ; ;
+        var valueAccountBeforeAutorefill = getAccountBeforeAutorefillData.Balance;
 
         var startOperationResponse = await OperationsRestClient.StartOperation("AccountRefill", accessToken);
         var startOperationData = JsonDeserializer.DeserializeData<InfoOperation>(startOperationResponse.Content!);
@@ -109,9 +104,10 @@ public class AccountRefillTests : BaseTest
 
         var confirmedOperationResponse = await OperationsRestClient.ConfirmedOperation(startOperationData.RequestId, accessToken);
 
-        var valueAccountAfterAutorefill = await Polling.GetAccountAfterOperation(
+        var valueAccountAfterAutorefill = await AccountsRestClient.GetAccountAfterOperation(
+            11812,
             valueAccountBeforeAutorefill + DifferenceAmount,
-            accessToken, "40875518618438343578");
+            accessToken);
 
         // Asserts
         Assert.Equal(HttpStatusCode.OK, startOperationResponse.StatusCode);
@@ -158,7 +154,7 @@ public class AccountRefillTests : BaseTest
         var accessToken = authenticationData?.AccessToken!;
 
         // Act
-        var getAccountBeforeAutorefillResponse = await AccountsRestClient.GetAccount(accessToken);
+        var getAccountBeforeAutorefillResponse = await AccountsRestClient.GetAccounts(accessToken);
         var getAccountBeforeAutorefillData = JsonDeserializer.DeserializeData<List<BankAccount>>(
                     getAccountBeforeAutorefillResponse.Content!);
 

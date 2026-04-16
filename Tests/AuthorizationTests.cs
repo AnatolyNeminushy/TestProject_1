@@ -1,4 +1,3 @@
-using RestSharp;
 using System.Net;
 using TestProjectIntern_n1.Core.ModelsData;
 using TestProjectIntern_n1.Core.Tools;
@@ -39,7 +38,7 @@ public class AuthorizationTests : BaseTest
         var accessToken = authenticationData.AccessToken;
 
         // Act
-        var accountsResponse = await AccountsRestClient.GetAccount(accessToken);
+        var accountsResponse = await AccountsRestClient.GetAccounts(accessToken);
         var cardsResponse = await CardsRestClient.GetCards(accessToken);
         var cardsOrdersResponse = await CardsRestClient.GetCardsOrders(accessToken);
 
@@ -75,7 +74,7 @@ public class AuthorizationTests : BaseTest
     public async Task AuthorizationClient_WithNonExistentAccessToken_ReturnsUnauthorized(string accessToken)
     {
         // Act
-        var accountsResponse = await AccountsRestClient.GetAccount(accessToken);
+        var accountsResponse = await AccountsRestClient.GetAccounts(accessToken);
         var cardsResponse = await CardsRestClient.GetCards(accessToken);
         var cardsOrdersResponse = await CardsRestClient.GetCardsOrders(accessToken);
 

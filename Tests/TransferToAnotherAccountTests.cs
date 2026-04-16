@@ -38,12 +38,12 @@ public class TransferToAnotherAccountTests : BaseTest
 
         // Act
         // Запросы текущего счета
-        var getCurrentAccountBeforeTransferResponse = await AccountsRestClient.GetAccount(accessCurrentAccountToken);
+        var getCurrentAccountBeforeTransferResponse = await AccountsRestClient.GetAccounts(accessCurrentAccountToken);
         var getCurrentAccountBeforeTransferData = JsonDeserializer.DeserializeData<List<BankAccount>>(
                     getCurrentAccountBeforeTransferResponse.Content!);
 
         // Запросы другого счета
-        var getAnotherAccountBeforeTransferResponse = await AccountsRestClient.GetAccount(accessAnotherAccountToken);
+        var getAnotherAccountBeforeTransferResponse = await AccountsRestClient.GetAccounts(accessAnotherAccountToken);
         var getAnotherAccountBeforeTransferData = JsonDeserializer.DeserializeData<List<BankAccount>>(
                     getAnotherAccountBeforeTransferResponse.Content!);
 
@@ -73,14 +73,16 @@ public class TransferToAnotherAccountTests : BaseTest
         var confirmedOperationData = JsonDeserializer.DeserializeData<InfoOperation>(confirmedOperationResponse.Content!);
 
         // Текущий счет
-        var valueCurrentAccountAfterTransfer = await Polling.GetAccountAfterOperation(
+        var valueCurrentAccountAfterTransfer = await AccountsRestClient.GetAccountAfterOperation(
+            11694,
             valueCurrentAccountBeforeTransfer - DifferenceAmount,
-            accessCurrentAccountToken, "40843043375888642346");
+            accessCurrentAccountToken);
 
         // Другой счет
-        var valueAnotherAccountAfterTransfer = await Polling.GetAccountAfterOperation(
+        var valueAnotherAccountAfterTransfer = await AccountsRestClient.GetAccountAfterOperation(
+            11705,
             valueCurrentAccountBeforeTransfer - DifferenceAmount,
-            accessAnotherAccountToken, "40830755020207104405");
+            accessAnotherAccountToken);
 
         // Asserts
         Assert.Equal(HttpStatusCode.OK, startOperationResponse.StatusCode);
@@ -127,12 +129,12 @@ public class TransferToAnotherAccountTests : BaseTest
 
         // Act
         // Запросы текущего счета
-        var getCurrentAccountBeforeTransferResponse = await AccountsRestClient.GetAccount(accessCurrentAccountToken);
+        var getCurrentAccountBeforeTransferResponse = await AccountsRestClient.GetAccounts(accessCurrentAccountToken);
         var getCurrentAccountBeforeTransferData = JsonDeserializer.DeserializeData<List<BankAccount>>(
                     getCurrentAccountBeforeTransferResponse.Content!);
 
         // Запросы другого счета
-        var getAnotherAccountBeforeTransferResponse = await AccountsRestClient.GetAccount(accessAnotherAccountToken);
+        var getAnotherAccountBeforeTransferResponse = await AccountsRestClient.GetAccounts(accessAnotherAccountToken);
         var getAnotherAccountBeforeTransferData = JsonDeserializer.DeserializeData<List<BankAccount>>(
                     getAnotherAccountBeforeTransferResponse.Content!);
 
@@ -160,14 +162,16 @@ public class TransferToAnotherAccountTests : BaseTest
                 startOperationData.RequestId, accessCurrentAccountToken);
 
         // Текущий счет
-        var valueCurrentAccountAfterTransfer = await Polling.GetAccountAfterOperation(
+        var valueCurrentAccountAfterTransfer = await AccountsRestClient.GetAccountAfterOperation(
+            11694,
             valueCurrentAccountBeforeTransfer - DifferenceAmount,
-            accessCurrentAccountToken, "40843043375888642346");
+            accessCurrentAccountToken);
 
         // Другой счет
-        var valueAnotherAccountAfterTransfer = await Polling.GetAccountAfterOperation(
+        var valueAnotherAccountAfterTransfer = await AccountsRestClient.GetAccountAfterOperation(
+            11705,
             valueCurrentAccountBeforeTransfer - DifferenceAmount,
-            accessAnotherAccountToken, "40830755020207104405");
+            accessAnotherAccountToken);
 
         // Asserts
         Assert.Equal(HttpStatusCode.OK, startOperationResponse.StatusCode);
