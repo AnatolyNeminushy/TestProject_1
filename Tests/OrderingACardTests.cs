@@ -8,7 +8,7 @@ namespace TestProjectIntern_n1.Tests;
 /// <summary>
 /// Тесты на заказ карты.
 /// </summary>
-public class OrderingACardTests : BaseTests
+public class OrderingACardTests : BaseTest
 {
     /// <summary>
     /// Заказ карты с валидными параметрами.
@@ -34,7 +34,7 @@ public class OrderingACardTests : BaseTests
         };
 
         // Arrange
-        var authenticationResponse = await AuthenticationRestClient.RequestToObtainAuthenticationToken(Login, Password);
+        var authenticationResponse = await AuthenticationRestClient.GetAuthenticationToken(Login, Password);
         var authenticationData = JsonDeserializer.DeserializeData<DataClients>(authenticationResponse.Content);
         var accessToken = authenticationData.AccessToken;
 
@@ -74,7 +74,7 @@ public class OrderingACardTests : BaseTests
     public async Task OprderingACard_WithInvalidOperationCode_ReturnsBadRequest(string operationCode)
     {
         // Arrange
-        var authenticationResponse = await AuthenticationRestClient.RequestToObtainAuthenticationToken(Login, Password);
+        var authenticationResponse = await AuthenticationRestClient.GetAuthenticationToken(Login, Password);
         var authenticationData = JsonDeserializer.DeserializeData<DataClients>(authenticationResponse.Content);
         var accessToken = authenticationData.AccessToken;
 
@@ -92,7 +92,7 @@ public class OrderingACardTests : BaseTests
     public async Task OprderingACard_WithInvalidOperationNumberCode_ReturnsBadRequest()
     {
         // Arrange
-        var authenticationResponse = await AuthenticationRestClient.RequestToObtainAuthenticationToken(Login, Password);
+        var authenticationResponse = await AuthenticationRestClient.GetAuthenticationToken(Login, Password);
         var authenticationData = JsonDeserializer.DeserializeData<DataClients>(authenticationResponse.Content);
         var accessToken = authenticationData.AccessToken;
 
@@ -126,7 +126,7 @@ public class OrderingACardTests : BaseTests
             new ParametrOperation { Identifier = "Birthdate", Value = "1998-12-06" },
         };
 
-        var authenticationResponse = await AuthenticationRestClient.RequestToObtainAuthenticationToken(Login, Password);
+        var authenticationResponse = await AuthenticationRestClient.GetAuthenticationToken(Login, Password);
         var authenticationData = JsonDeserializer.DeserializeData<DataClients>(authenticationResponse.Content);
         var accessToken = authenticationData.AccessToken;
 

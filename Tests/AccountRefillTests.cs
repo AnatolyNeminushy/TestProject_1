@@ -9,7 +9,7 @@ namespace TestProjectIntern_n1.Tests;
 /// <summary>
 /// Тесты на пополнение счета.
 /// </summary>
-public class AccountRefillTests : BaseTests
+public class AccountRefillTests : BaseTest
 {
     /// <summary>
     /// Пополнение счета с валидными данными.
@@ -18,16 +18,14 @@ public class AccountRefillTests : BaseTests
     public async Task AccountRefill_WithExistingDataClient_ReturnsOk()
     {
         // Arrange
-        var authenticationResponse = await AuthenticationRestClient.RequestToObtainAuthenticationToken(Login, Password);
+        var authenticationResponse = await AuthenticationRestClient.GetAuthenticationToken(Login, Password);
         var authenticationData = JsonDeserializer.DeserializeData<DataClients>(authenticationResponse.Content!)
             ?? throw new Exception("Ошибка при десериализации.");
         var accessToken = authenticationData.AccessToken
             ?? throw new Exception("Ошибка при получении токена.");
 
-        var getAccountBeforeAutorefillRequest = ClientsRestClient.CreateBaseRequest("api/accounts", Method.Get, accessToken);
-
         // Act
-        var getAccountBeforeAutorefillResponse = await ClientsRestClient.Client.ExecuteAsync(getAccountBeforeAutorefillRequest);
+        var getAccountBeforeAutorefillResponse = await AccountsRestClient.GetAccount(accessToken);
         var getAccountBeforeAutorefillData = JsonDeserializer.DeserializeData<List<BankAccount>>(
             getAccountBeforeAutorefillResponse.Content!);
 
@@ -51,7 +49,7 @@ public class AccountRefillTests : BaseTests
         var confirmedOperationResponse = await OperationsRestClient.ConfirmedOperation(startOperationData.RequestId, accessToken);
         var confirmedOperationData = JsonDeserializer.DeserializeData<InfoOperation>(confirmedOperationResponse.Content!);
 
-        var valueAccountAfterAutorefill = await Polling.ForGetBalance(
+        var valueAccountAfterAutorefill = await Polling.GetAccountAfterOperation(
             valueAccountBeforeAutorefill + DifferenceAmount,
             accessToken, "40875518618438343578");
 
@@ -81,17 +79,15 @@ public class AccountRefillTests : BaseTests
     public async Task AccountRefill_WithPenny_ReturnsOk(string amount)
     {
         // Arrange
-        var authenticationResponse = await AuthenticationRestClient.RequestToObtainAuthenticationToken(Login, Password);
+        var authenticationResponse = await AuthenticationRestClient.GetAuthenticationToken(Login, Password);
 
         var authenticationData = JsonDeserializer.DeserializeData<DataClients>(authenticationResponse.Content!)
             ?? throw new Exception("Ошибка при десериализации.");
         var accessToken = authenticationData.AccessToken
             ?? throw new Exception("Ошибка при получении токена.");
 
-        var getAccountBeforeAutorefillRequest = ClientsRestClient.CreateBaseRequest("api/accounts", Method.Get, accessToken);
-
         // Act
-        var getAccountBeforeAutorefillResponse = await ClientsRestClient.Client.ExecuteAsync(getAccountBeforeAutorefillRequest);
+        var getAccountBeforeAutorefillResponse = await AccountsRestClient.GetAccount(accessToken);
         var getAccountBeforeAutorefillData = JsonDeserializer.DeserializeData<List<BankAccount>>(
                     getAccountBeforeAutorefillResponse.Content!);
 
@@ -113,7 +109,7 @@ public class AccountRefillTests : BaseTests
 
         var confirmedOperationResponse = await OperationsRestClient.ConfirmedOperation(startOperationData.RequestId, accessToken);
 
-        var valueAccountAfterAutorefill = await Polling.ForGetBalance(
+        var valueAccountAfterAutorefill = await Polling.GetAccountAfterOperation(
             valueAccountBeforeAutorefill + DifferenceAmount,
             accessToken, "40875518618438343578");
 
@@ -137,11 +133,9 @@ public class AccountRefillTests : BaseTests
     public async Task AccountRefill_WithInvalidOperationCode_ReturnsBadRequest(string operationCode)
     {
         // Arrange
-        var authenticationResponse = await AuthenticationRestClient.RequestToObtainAuthenticationToken(Login, Password);
+        var authenticationResponse = await AuthenticationRestClient.GetAuthenticationToken(Login, Password);
         var authenticationData = JsonDeserializer.DeserializeData<DataClients>(authenticationResponse.Content!);
         var accessToken = authenticationData?.AccessToken!;
-
-        var getAccountBeforeAutorefillRequest = ClientsRestClient.CreateBaseRequest("api/accounts", Method.Get, accessToken);
 
         // Act
         var startOperationResponse = await OperationsRestClient.StartOperation(operationCode, accessToken);
@@ -159,14 +153,12 @@ public class AccountRefillTests : BaseTests
     public async Task AccountRefill_WithInvalidOperationNumberCode_ReturnsBadRequest()
     {
         // Arrange
-        var authenticationResponse = await AuthenticationRestClient.RequestToObtainAuthenticationToken(Login, Password);
+        var authenticationResponse = await AuthenticationRestClient.GetAuthenticationToken(Login, Password);
         var authenticationData = JsonDeserializer.DeserializeData<DataClients>(authenticationResponse.Content!);
         var accessToken = authenticationData?.AccessToken!;
 
-        var getAccountBeforeAutorefillRequest = ClientsRestClient.CreateBaseRequest("api/accounts", Method.Get, accessToken);
-
         // Act
-        var getAccountBeforeAutorefillResponse = await ClientsRestClient.Client.ExecuteAsync(getAccountBeforeAutorefillRequest);
+        var getAccountBeforeAutorefillResponse = await AccountsRestClient.GetAccount(accessToken);
         var getAccountBeforeAutorefillData = JsonDeserializer.DeserializeData<List<BankAccount>>(
                     getAccountBeforeAutorefillResponse.Content!);
 
@@ -187,7 +179,7 @@ public class AccountRefillTests : BaseTests
     public async Task AccountRefill_WithInvalidAmount_ReturnsBadRequest(string amount)
     {
         // Arrange
-        var authenticationResponse = await AuthenticationRestClient.RequestToObtainAuthenticationToken(Login, Password);
+        var authenticationResponse = await AuthenticationRestClient.GetAuthenticationToken(Login, Password);
         var authenticationData = JsonDeserializer.DeserializeData<DataClients>(authenticationResponse.Content!)
             ?? throw new Exception("Ошибка при десериализации.");
         var accessToken = authenticationData.AccessToken
@@ -226,7 +218,7 @@ public class AccountRefillTests : BaseTests
     public async Task AccountRefill_WithLetterSymbolAmount_ReturnsBadRequest(string amount)
     {
         // Arrange
-        var authenticationResponse = await AuthenticationRestClient.RequestToObtainAuthenticationToken(Login, Password);
+        var authenticationResponse = await AuthenticationRestClient.GetAuthenticationToken(Login, Password);
         var authenticationData = JsonDeserializer.DeserializeData<DataClients>(authenticationResponse.Content!)
             ?? throw new Exception("Ошибка при десериализации.");
         var accessToken = authenticationData.AccessToken
@@ -248,7 +240,6 @@ public class AccountRefillTests : BaseTests
 
         // Asserts
         Assert.Equal(HttpStatusCode.OK, startOperationResponse.StatusCode);
-        Console.WriteLine(nextStepOperationResponse.StatusCode);
         Assert.False(startOperationData.IsConfirmed);
         Assert.False(startOperationData.IsFinished);
 

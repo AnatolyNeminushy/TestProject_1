@@ -14,12 +14,12 @@ public class AuthenticationRestClient : BaseRestClient
     /// <param name="login">Логин зарегистрированного пользователя.</param>
     /// <param name="password">Пароль зарегистрированного пользователя.</param>
     /// <returns>Объект с токеном аутентификации.</returns>
-    public async Task<RestResponse> RequestToObtainAuthenticationToken(string? login, string? password)
+    public async Task<RestResponse> GetAuthenticationToken(string? login, string? password)
     {
-        var postRequest = CreateBaseRequest("api/authorization/token", Method.Post);
+        var request = CreateBaseRequest("api/authorization/token", Method.Post);
         var data = new DataClients { Login = login, Password = password };
-        postRequest.AddJsonBody(data);
+        request.AddJsonBody(data);
 
-        return await Client.ExecuteAsync(postRequest);
+        return await Client.ExecuteAsync(request);
     }
 }

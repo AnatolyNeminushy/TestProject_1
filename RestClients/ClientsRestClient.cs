@@ -21,4 +21,17 @@ public class ClientsRestClient : BaseRestClient
 
         return response;
     }
+
+    /// <summary>
+    /// Получние данных о пользователе.
+    /// </summary>
+    /// <param name="accessToken"></param>
+    /// <returns></returns>
+    public async Task<RestResponse> GetClient(string accessToken)
+    {
+        var request = CreateBaseRequest("api/clients", Method.Get);
+        request.AddHeader("Authorization", $"Bearer {accessToken}");
+
+        return await Client.ExecuteAsync(request);
+    }
 }

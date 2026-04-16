@@ -8,7 +8,7 @@ namespace TestProjectIntern_n1.Tests;
 /// <summary>
 /// Тесты на открытие банковского счета.             
 /// </summary>
-public class OpeningAnAccountTests : BaseTests
+public class OpeningAnAccountTests : BaseTest
 {
     /// <summary>
     /// Открытие банковского счета у зарегистрированного пользователя.
@@ -31,7 +31,7 @@ public class OpeningAnAccountTests : BaseTests
             new ParametrOperation { Identifier = "Birthdate", Value = "1998-12-06" },
         };
 
-        var authenticationResponse = await AuthenticationRestClient.RequestToObtainAuthenticationToken(Login, Password);
+        var authenticationResponse = await AuthenticationRestClient.GetAuthenticationToken(Login, Password);
         var authenticationData = JsonDeserializer.DeserializeData<DataClients>(authenticationResponse.Content);
         var accessToken = authenticationData.AccessToken;
 
@@ -72,7 +72,7 @@ public class OpeningAnAccountTests : BaseTests
     public async Task OpeningAnAccount_WithInvalidOperationCode_ReturnsBadRequest(string operationCode)
     {
         // Arrange
-        var authenticationResponse = await AuthenticationRestClient.RequestToObtainAuthenticationToken(Login, Password);
+        var authenticationResponse = await AuthenticationRestClient.GetAuthenticationToken(Login, Password);
         var authenticationData = JsonDeserializer.DeserializeData<DataClients>(authenticationResponse.Content);
         var accessToken = authenticationData.AccessToken;
 
@@ -91,7 +91,7 @@ public class OpeningAnAccountTests : BaseTests
     public async Task OpeningAnAccount_WithInvalidOperationNumberCode_ReturnsBadRequest()
     {
         // Arrange
-        var authenticationResponse = await AuthenticationRestClient.RequestToObtainAuthenticationToken(Login, Password);
+        var authenticationResponse = await AuthenticationRestClient.GetAuthenticationToken(Login, Password);
         var authenticationData = JsonDeserializer.DeserializeData<DataClients>(authenticationResponse.Content);
         var accessToken = authenticationData.AccessToken;
 
@@ -120,7 +120,7 @@ public class OpeningAnAccountTests : BaseTests
             new ParametrOperation { Identifier = "Birthdate", Value = "1998-12-06" },
         };
 
-        var authenticationResponse = await AuthenticationRestClient.RequestToObtainAuthenticationToken(Login, Password);
+        var authenticationResponse = await AuthenticationRestClient.GetAuthenticationToken(Login, Password);
         var authenticationData = JsonDeserializer.DeserializeData<DataClients>(authenticationResponse.Content);
         var accessToken = authenticationData.AccessToken;
 

@@ -5,7 +5,7 @@ namespace TestProjectIntern_n1.Tests;
 /// <summary>
 /// Базовые тестовые данные.
 /// </summary>
-public abstract class BaseTests
+public abstract class BaseTest
 {
     /// <summary>
     /// Логин пользователя.
@@ -41,6 +41,16 @@ public abstract class BaseTests
     /// Клиент для совершения операций.
     /// </summary>
     protected OperationsRestClient OperationsRestClient = new OperationsRestClient();
+
+    /// <summary>
+    /// Клиент для получения счета пользователя.
+    /// </summary>
+    protected AccountsRestClient AccountsRestClient = new AccountsRestClient();
+
+    /// <summary>
+    /// Клиент для получения карт пользователя.
+    /// </summary>
+    protected CardsRestClient CardsRestClient = new CardsRestClient();
 
     /// <summary>
     /// Клиент для получения токена аутентификаци.

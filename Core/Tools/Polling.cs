@@ -4,7 +4,6 @@ using TestProjectIntern_n1.Core.ModelsData;
 using TestProjectIntern_n1.RestClients;
 
 namespace TestProjectIntern_n1.Core.Tools;
-// TODO переименовать везде
 
 /// <summary>
 /// Инструмент для вызова повторяющихся запросов на сервер.
@@ -18,7 +17,7 @@ public static class Polling
     /// <param name="token">Токен аутентификации.</param>
     /// <param name="account">Банковский счет пользователя.</param>
     /// <returns>Баланс счета.</returns>
-    public static async Task<BankAccount> ForGetBalance(
+    public static async Task<BankAccount> GetAccountAfterOperation(
         decimal expectedBalance, string token, string account)
     {
         var restClients = new ClientsRestClient();

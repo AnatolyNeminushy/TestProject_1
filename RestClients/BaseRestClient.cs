@@ -9,12 +9,12 @@ namespace TestProjectIntern_n1.RestClients;
 public class BaseRestClient
 {
     /// <summary>
-    /// Rest клиент.
+    /// Rest-клиент.
     /// </summary>
     public readonly RestClient Client;
 
     /// <summary>
-    /// TODO - комменты
+    /// Конструктор базового клиента.
     /// </summary>
     public BaseRestClient()
     {
@@ -32,16 +32,13 @@ public class BaseRestClient
     /// <param name="resource">Endpoint запроса.</param>
     /// <param name="method">Http-метод запроса.</param>
     /// <returns>Настроенный запрос.</returns>
-    public RestRequest CreateBaseRequest(string resource, Method method, string accessToken = null)
+    /// TODO убрать гет из базовоого запроса
+    public RestRequest CreateBaseRequest(string resource, Method method)
     {
         var request = new RestRequest(resource, method);
         request.AddHeader("Accept", "application/json");
         request.AddHeader("Accept-Charset", "utf-8");
         request.AddCookie("X-iTester-Access", "2ad3f9a0ee6b486db902ade89d6850ff");
-        if (accessToken != null)
-        {
-            request.AddHeader("Authorization", $"Bearer {accessToken}");
-        }
 
         return request;
     }

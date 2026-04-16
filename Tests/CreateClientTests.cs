@@ -9,7 +9,7 @@ namespace TestProjectIntern_n1.Tests;
 /// <summary>
 /// Тесты на создание пользователя.
 /// </summary>
-public class CreateClientTests : BaseTests
+public class CreateClientTests : BaseTest
 {
     /// <summary>
     /// Создание данных пользователя.
@@ -52,7 +52,7 @@ public class CreateClientTests : BaseTests
 
         var createClientResponse = await ClientsRestClient.CreateClient(data);
 
-        var authenticationResponse = await AuthenticationRestClient.RequestToObtainAuthenticationToken(data.Login, data.Password);
+        var authenticationResponse = await AuthenticationRestClient.GetAuthenticationToken(data.Login, data.Password);
         var authenticationData = JsonDeserializer.DeserializeData<DataClients>(authenticationResponse.Content);
         var accessToken = authenticationData.AccessToken;
 
