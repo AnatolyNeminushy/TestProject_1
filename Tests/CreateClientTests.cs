@@ -56,10 +56,8 @@ public class CreateClientTests : BaseTest
         var authenticationData = JsonDeserializer.DeserializeData<DataClients>(authenticationResponse.Content);
         var accessToken = authenticationData.AccessToken;
 
-        var getClientRequest = ClientsRestClient.CreateBaseRequest("api/clients", Method.Get, accessToken);
-
         // Act
-        var getClientResponse = await ClientsRestClient.Client.ExecuteAsync(getClientRequest);
+        var getClientResponse = await ClientsRestClient.GetClient(accessToken);
         var getClientData = JsonDeserializer.DeserializeData<DataClients>(getClientResponse.Content);
 
         // Asserts

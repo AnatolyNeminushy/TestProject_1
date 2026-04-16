@@ -32,7 +32,6 @@ public class BaseRestClient
     /// <param name="resource">Endpoint запроса.</param>
     /// <param name="method">Http-метод запроса.</param>
     /// <returns>Настроенный запрос.</returns>
-    /// TODO убрать гет из базовоого запроса
     public RestRequest CreateBaseRequest(string resource, Method method)
     {
         var request = new RestRequest(resource, method);
