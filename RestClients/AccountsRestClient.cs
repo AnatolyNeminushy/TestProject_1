@@ -47,15 +47,13 @@ public class AccountsRestClient : BaseRestClient
     /// <returns>Объект данных после завершения операции.</returns>
     public async Task<BankAccount> GetAccountAfterOperation(int accountId, decimal expectedBalance, string token)
     {
-        var accountRestClient = new AccountsRestClient();
-
         var accountAfterOperation = await Policy<BankAccount>
             .Handle<Exception>()
             .OrResult(data => data.Balance != expectedBalance)
             .WaitAndRetryAsync(60, n => TimeSpan.FromSeconds(1))
             .ExecuteAsync(async () =>
             {
-                var response = await accountRestClient.GetAccount(accountId, token);
+                var response = await GetAccount(accountId, token);
 
                 return JsonDeserializer.DeserializeData<BankAccount>(response.Content);
             });
