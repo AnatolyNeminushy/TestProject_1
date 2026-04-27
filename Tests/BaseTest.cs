@@ -56,5 +56,10 @@ public abstract class BaseTest
     /// Клиент для получения токена аутентификаци.
     /// </summary>
     protected AuthenticationRestClient AuthenticationRestClient = new AuthenticationRestClient();
+
+    /// <summary>
+    /// Клиент для блокировки банковского счета пользователя.
+    /// </summary>
+    protected LockAccountRestClient LockAccountRestClient = new LockAccountRestClient();
 }
 
