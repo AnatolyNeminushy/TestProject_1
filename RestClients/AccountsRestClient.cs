@@ -60,5 +60,33 @@ public class AccountsRestClient : BaseRestClient
 
         return accountAfterOperation;
     }
+
+    /// <summary>
+    /// Блокировка банковского счета пользователя.
+    /// </summary>
+    /// <param name="accountId">Id счета.</param>
+    /// <param name="accessToken">Токен аутентификации.</param>
+    /// <returns>Объект с данными пользователя.</returns>
+    public async Task<RestResponse> LockAccount<T>(T accountId, string accessToken)
+    {
+        var request = CreateBaseRequest($"api/accounts/lock/{accountId}", Method.Patch);
+        request.AddHeader("Authorization", $"Bearer {accessToken}");
+
+        return await Client.ExecuteAsync(request);
+    }
+
+    /// <summary>
+    /// Разблокировка банковского счета пользователя.
+    /// </summary>
+    /// <param name="accountId">Id счета.</param>
+    /// <param name="accessToken">Токен аутентификации.</param>
+    /// <returns>Объект с данными пользователя.</returns>
+    public async Task<RestResponse> UnlockAccount<T>(T accountId, string accessToken)
+    {
+        var request = CreateBaseRequest($"api/accounts/unlock/{accountId}", Method.Patch);
+        request.AddHeader("Authorization", $"Bearer {accessToken}");
+
+        return await Client.ExecuteAsync(request);
+    }
 }
 
