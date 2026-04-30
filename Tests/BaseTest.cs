@@ -1,3 +1,5 @@
+using TestProjectIntern_n1.Core.ModelsData;
+using TestProjectIntern_n1.Core.Tools;
 using TestProjectIntern_n1.RestClients;
 
 namespace TestProjectIntern_n1.Tests;
@@ -8,24 +10,34 @@ namespace TestProjectIntern_n1.Tests;
 public abstract class BaseTest
 {
     /// <summary>
-    /// Логин пользователя.
+    /// Логин первого пользователя.
     /// </summary>
     protected const string Login = "DimaFire";
 
     /// <summary>
-    /// Пароль пользователя.
+    /// Пароль первого пользователя.
     /// </summary>
     protected const string Password = "Dima5678";
 
     /// <summary>
-    /// Логин другого пользователя.
+    /// Логин второго пользователя.
     /// </summary>
     protected const string LoginAnotherAccount = "IvanWater";
 
     /// <summary>
-    /// Пароль другого пользователя.
+    /// Пароль второго пользователя.
     /// </summary>
     protected const string PasswordAnotherAccount = "Ivan1234";
+
+    /// <summary>
+    /// Логин пользователя с банковскими счетами для проверки блокировки.
+    /// </summary>
+    protected const string LoginForLockAccount = "RomaIce";
+
+    /// <summary>
+    /// Пароль пользователя с банковскими счетами для проверки блокировки.
+    /// </summary>
+    protected const string PasswordForLockAccount = "RomaForever5643";
 
     /// <summary>
     /// Разница в сумме.
@@ -58,8 +70,35 @@ public abstract class BaseTest
     protected AuthenticationRestClient AuthenticationRestClient = new AuthenticationRestClient();
 
     /// <summary>
-    /// Клиент для блокировки банковского счета пользователя.
+    /// Создание и блокировка банковского счета пользователя.
     /// </summary>
-    protected LockAccountRestClient LockAccountRestClient = new LockAccountRestClient();
+    protected async Task<BankAccount> CreateAndLockAccount()
+    {
+        var bodyCreateAccount = new List<ParametrOperation>()
+        {
+            new ParametrOperation { Identifier = "AccountType", Value = "Текущий счёт" },
+            new ParametrOperation { Identifier = "Currency", Value = "Российский Рубль" }
+        };
+        var authenticationResponse = await AuthenticationRestClient.GetAuthenticationToken(LoginForLockAccount, PasswordForLockAccount);
+        var authenticationData = JsonDeserializer.DeserializeData<DataClients>(authenticationResponse.Content);
+        var accessToken = authenticationData.AccessToken;
+
+        var startOperationResponse = await OperationsRestClient.StartOperation("AccountOpen", accessToken);
+        var startOperationData = JsonDeserializer.DeserializeData<InfoOperation>(startOperationResponse.Content);
+
+        var nextStepOperationResponse = await OperationsRestClient.NextStepOperation(startOperationData.RequestId, bodyCreateAccount, accessToken);
+        var confirmedOperationResponse = await OperationsRestClient.ConfirmedOperation(startOperationData.RequestId, accessToken);
+
+        var getAccountsResponse = await AccountsRestClient.GetAccounts(accessToken);
+        var getAccountsData = JsonDeserializer.DeserializeData<List<BankAccount>>(getAccountsResponse.Content!);
+
+        var account = getAccountsData
+            .FirstOrDefault(x => x.State == "Active");
+
+        var lockAccountResponse = await AccountsRestClient.LockAccount(account.Id, accessToken);
+        var lockAccountData = JsonDeserializer.DeserializeData<BankAccount>(lockAccountResponse.Content);
+
+        return lockAccountData;
+    }
 }
 
