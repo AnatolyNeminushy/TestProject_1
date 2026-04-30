@@ -1,4 +1,3 @@
-using RestSharp;
 using System.Net;
 using TestProjectIntern_n1.Core.ModelsData;
 using TestProjectIntern_n1.Core.Tools;
