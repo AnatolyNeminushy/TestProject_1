@@ -1,4 +1,3 @@
-
 using System.Net;
 using TestProjectIntern_n1.Core.ModelsData;
 using TestProjectIntern_n1.Core.Tools;
@@ -14,20 +13,103 @@ public class LockAccountTests : BaseTest
     /// Блокировка банковского счета пользователя с валидным AccountId.
     /// </summary>
     [Fact]
-    public async Task LockAccount_WithValidAccountId_ReturnsOk()
+    public async Task CheckState_ReturnsOk()
+    {
+        //Act
+        var account = await CreateAndLockAccount();
+
+        //Asserts
+        Assert.Equal("Blocked", account.State);
+    }
+
+    /// <summary>
+    /// Пополнение на заблокированный банковский счет.
+    /// </summary>
+    [Fact]
+    public async Task AutoRefill_AfterLockAccount_ReturnsBadRequest()
     {
         //Arrange
-        var authenticationResponse = await AuthenticationRestClient.GetAuthenticationToken(Login, Password);
+        var account = await CreateAndLockAccount();
+
+        //Act
+        var authenticationResponse = await AuthenticationRestClient.GetAuthenticationToken(LoginForLockAccount, PasswordForLockAccount);
         var authenticationData = JsonDeserializer.DeserializeData<DataClients>(authenticationResponse.Content);
         var accessToken = authenticationData.AccessToken;
 
-        //Act
-        var lockAccountResponse = await LockAccountRestClient.LockAccount(11705, accessToken);
-        var lockAccountData = JsonDeserializer.DeserializeData<BankAccount>(lockAccountResponse.Content);
+        var startOperationResponse = await OperationsRestClient.StartOperation("AccountRefill", accessToken);
+        var startOperationData = JsonDeserializer.DeserializeData<InfoOperation>(startOperationResponse.Content!);
+
+        var body = new List<ParametrOperation>()
+        {
+            new ParametrOperation { Identifier = "Account", Value = $"[{account.Number}]" },
+            new ParametrOperation { Identifier = "Amount", Value = "10" },
+        };
+
+        var nextStepOperationResponse = await OperationsRestClient.NextStepOperation(startOperationData!.RequestId, body, accessToken);
 
         //Asserts
-        Assert.Equal(HttpStatusCode.OK, lockAccountResponse.StatusCode);
-        Assert.Equal("Blocked", lockAccountData.State);
+        Assert.Equal(HttpStatusCode.BadRequest, nextStepOperationResponse.StatusCode);
+    }
+
+    /// <summary>
+    /// Перевод с заблокированного счета на другой счет.
+    /// </summary>
+    [Fact]
+    public async Task Transfer_WithLockAccountToAnotherAccount_ReturnsBadRequest()
+    {
+        //Arrange
+        var account = await CreateAndLockAccount();
+
+        //Act
+        var authenticationResponse = await AuthenticationRestClient.GetAuthenticationToken(LoginForLockAccount, PasswordForLockAccount);
+        var authenticationData = JsonDeserializer.DeserializeData<DataClients>(authenticationResponse.Content);
+        var accessToken = authenticationData.AccessToken;
+
+        var startOperationResponse = await OperationsRestClient.StartOperation("AccountTransfer", accessToken);
+        var startOperationData = JsonDeserializer.DeserializeData<InfoOperation>(startOperationResponse.Content!);
+
+        var body = new List<ParametrOperation>()
+        {
+            new ParametrOperation { Identifier = "SourceAccount", Value = $"[{account.Number}]" },
+            new ParametrOperation { Identifier = "ReceiverAccount", Value = "40837744138351246154" },
+            new ParametrOperation { Identifier = "Amount", Value = "1" },
+        };
+
+        var nextStepOperationResponse = await OperationsRestClient.NextStepOperation(startOperationData!.RequestId, body, accessToken);
+
+
+        //Asserts
+        Assert.Equal(HttpStatusCode.BadRequest, nextStepOperationResponse.StatusCode);
+    }
+
+    /// <summary>
+    /// Перевод с другого счета на заблокированный счет.
+    /// </summary>
+    [Fact]
+    public async Task Transfer_WithAnotherAccountToLockAccount_ReturnsBadRequest()
+    {
+        //Arrange
+        var account = await CreateAndLockAccount();
+
+        //Act
+        var authenticationResponse = await AuthenticationRestClient.GetAuthenticationToken(LoginForLockAccount, PasswordForLockAccount);
+        var authenticationData = JsonDeserializer.DeserializeData<DataClients>(authenticationResponse.Content);
+        var accessToken = authenticationData.AccessToken;
+
+        var startOperationResponse = await OperationsRestClient.StartOperation("AccountTransfer", accessToken);
+        var startOperationData = JsonDeserializer.DeserializeData<InfoOperation>(startOperationResponse.Content!);
+
+        var body = new List<ParametrOperation>()
+        {
+            new ParametrOperation { Identifier = "SourceAccount", Value = "[40855720615481714118]" },
+            new ParametrOperation { Identifier = "ReceiverAccount", Value = $"{account.Number}" },
+            new ParametrOperation { Identifier = "Amount", Value = "1" },
+        };
+
+        var nextStepOperationResponse = await OperationsRestClient.NextStepOperation(startOperationData!.RequestId, body, accessToken);
+
+        //Asserts
+        Assert.Equal(HttpStatusCode.BadRequest, nextStepOperationResponse.StatusCode);
     }
 
     /// <summary>
@@ -36,7 +118,7 @@ public class LockAccountTests : BaseTest
     [Theory]
     [InlineData(null)]
     [InlineData("")]
-    [InlineData(1)]
+    [InlineData(13233)]
     [InlineData("#@^#&")]
     public async Task LockAccount_WithInvalidAccountId_ReturnsBadRequest<T>(T accountId)
     {
@@ -46,7 +128,7 @@ public class LockAccountTests : BaseTest
         var accessToken = authenticationData.AccessToken;
 
         //Act
-        var lockAccountResponse = await LockAccountRestClient.LockAccount(accountId, accessToken);
+        var lockAccountResponse = await AccountsRestClient.LockAccount(accountId, accessToken);
 
         //Asserts
         Assert.Equal(HttpStatusCode.BadRequest, lockAccountResponse.StatusCode);
