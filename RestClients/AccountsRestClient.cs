@@ -67,7 +67,7 @@ public class AccountsRestClient : BaseRestClient
     /// <param name="accountId">Id счета.</param>
     /// <param name="accessToken">Токен аутентификации.</param>
     /// <returns>Объект с данными пользователя.</returns>
-    public async Task<RestResponse> LockAccount<T>(T accountId, string accessToken)
+    public async Task<RestResponse> LockAccount(int accountId, string accessToken)
     {
         var request = CreateBaseRequest($"api/accounts/lock/{accountId}", Method.Patch);
         request.AddHeader("Authorization", $"Bearer {accessToken}");
@@ -81,7 +81,7 @@ public class AccountsRestClient : BaseRestClient
     /// <param name="accountId">Id счета.</param>
     /// <param name="accessToken">Токен аутентификации.</param>
     /// <returns>Объект с данными пользователя.</returns>
-    public async Task<RestResponse> UnlockAccount<T>(T accountId, string accessToken)
+    public async Task<RestResponse> UnlockAccount(int accountId, string accessToken)
     {
         var request = CreateBaseRequest($"api/accounts/unlock/{accountId}", Method.Patch);
         request.AddHeader("Authorization", $"Bearer {accessToken}");
