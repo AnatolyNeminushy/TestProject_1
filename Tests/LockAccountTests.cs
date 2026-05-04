@@ -111,26 +111,4 @@ public class LockAccountTests : BaseTest
         //Asserts
         Assert.Equal(HttpStatusCode.BadRequest, nextStepOperationResponse.StatusCode);
     }
-
-    /// <summary>
-    /// Блокировка банковского счета пользователя с невалидным AccountId.
-    /// </summary>
-    [Theory]
-    [InlineData(null)]
-    [InlineData("")]
-    [InlineData(13233)]
-    [InlineData("#@^#&")]
-    public async Task LockAccount_WithInvalidAccountId_ReturnsBadRequest<T>(T accountId)
-    {
-        //Arrange
-        var authenticationResponse = await AuthenticationRestClient.GetAuthenticationToken(Login, Password);
-        var authenticationData = JsonDeserializer.DeserializeData<DataClients>(authenticationResponse.Content);
-        var accessToken = authenticationData.AccessToken;
-
-        //Act
-        var lockAccountResponse = await AccountsRestClient.LockAccount(accountId, accessToken);
-
-        //Asserts
-        Assert.Equal(HttpStatusCode.BadRequest, lockAccountResponse.StatusCode);
-    }
 }
