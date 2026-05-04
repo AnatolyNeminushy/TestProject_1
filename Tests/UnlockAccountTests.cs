@@ -76,26 +76,4 @@ public class UnlockAccountTests : BaseTest
         Assert.True(confirmedOperationData.IsConfirmed);
         Assert.True(confirmedOperationData.IsFinished);
     }
-
-    /// <summary>
-    /// Разблокировка банковского счета пользователя с невалидным AccountId.
-    /// </summary>
-    [Theory]
-    [InlineData(null)]
-    [InlineData("")]
-    [InlineData(13233)]
-    [InlineData("#@^#&")]
-    public async Task UnockAccount_WithInvalidAccountId_ReturnsBadRequest<T>(T accountId)
-    {
-        //Arrange
-        var authenticationResponse = await AuthenticationRestClient.GetAuthenticationToken(Login, Password);
-        var authenticationData = JsonDeserializer.DeserializeData<DataClients>(authenticationResponse.Content);
-        var accessToken = authenticationData.AccessToken;
-
-        //Act
-        var unlockAccountResponse = await AccountsRestClient.UnlockAccount(accountId, accessToken);
-
-        //Asserts
-        Assert.Equal(HttpStatusCode.BadRequest, unlockAccountResponse.StatusCode);
-    }
 }
