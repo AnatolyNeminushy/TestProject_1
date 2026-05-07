@@ -70,6 +70,11 @@ public abstract class BaseTest
     protected AuthenticationRestClient AuthenticationRestClient = new AuthenticationRestClient();
 
     /// <summary>
+    /// Клиент для получения доступных продуктов.
+    /// </summary>
+    protected ShowcaseRestClient ShowcaseRestClient = new ShowcaseRestClient();
+
+    /// <summary>
     /// Создание и блокировка банковского счета пользователя.
     /// </summary>
     protected async Task<BankAccount> CreateAndLockAccount()
