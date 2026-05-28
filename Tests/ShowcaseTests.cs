@@ -10,7 +10,7 @@ public class ShowcaseTests : BaseTest
     /// <summary>
     /// Получение информации о доступных продуктов.
     /// </summary>
-    /// <returns></returns>
+    [Fact]
     public async Task ShowcaseProducts_ReturnsOk()
     {
         // Act
@@ -23,7 +23,7 @@ public class ShowcaseTests : BaseTest
     /// <summary>
     /// Получение информации о доступном продукте.
     /// </summary>
-    /// <returns></returns>
+    [Fact]
     public async Task ShowcaseProduct_WithProductId_ReturnsOk()
     {
         // Act
@@ -36,7 +36,7 @@ public class ShowcaseTests : BaseTest
     /// <summary>
     /// Получение информации о доступном продукте c невалидным id.
     /// </summary>
-    /// <returns></returns>
+    [Fact]
     public async Task ShowcaseProduct_WithInvaildProductId_ReturnsOk()
     {
         // Act
