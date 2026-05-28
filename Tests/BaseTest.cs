@@ -75,6 +75,11 @@ public abstract class BaseTest
     protected ShowcaseRestClient ShowcaseRestClient = new ShowcaseRestClient();
 
     /// <summary>
+    /// Клиент для получения транзакций.
+    /// </summary>
+    protected TransactionsRestClient TransactionsRestClient = new TransactionsRestClient();
+
+    /// <summary>
     /// Создание и блокировка банковского счета пользователя.
     /// </summary>
     protected async Task<BankAccount> CreateAndLockAccount()
